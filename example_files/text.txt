@@ -1,0 +1,16 @@
+Features to do:
+2D and 3D digraphs
+    display only selected section
+    there should be bit and byte offset (or just only multi-byte offset?)
+    there should be configurable display line lengths
+bi-directional hex and graphical navigation
+hilbert translation
+    maps 1D space to an alternative dimensional space
+    preserves locality
+    hilbert byte plot
+    shaded by byte class
+
+Links:
+https://corte.si/posts/visualisation/entropy/index.html
+https://inside.battelle.org/blog-details/battelle-publishes-open-source-binary-visualization-tool
+https://github.com/Battelle/cantordust
