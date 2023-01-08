@@ -9,9 +9,25 @@ hilbert translation
     preserves locality
     hilbert byte plot
     shaded by byte class
+coloring by entropy
+
+previews are byteplots
+Automatic binary mapping through byte plot is
+suggested by Conti et al. [14]. Byte plot visualization is
+used to identify the internal structure of the binary files.
+Each byte in the target binary file is transformed into a
+pixel value, ranging from 0 to FF. 0 value represents
+white and FF value represents black
+
+classification:
+    naiive bayes classification of n-gram models
+
 
 Links:
 https://corte.si/posts/visualisation/entropy/index.html
 https://inside.battelle.org/blog-details/battelle-publishes-open-source-binary-visualization-tool
 https://github.com/Battelle/cantordust
 https://gynvael.coldwind.pl/?id=199
+
+http://vigir.missouri.edu/~gdesouza/Research/Conference_CDs/IEEE_WCCI_2020/CEC/Papers/E-24183.pdf
+https://www.sciencedirect.com/science/article/pii/S0167404822000591
