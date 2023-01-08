@@ -31,3 +31,4 @@ https://gynvael.coldwind.pl/?id=199
 
 http://vigir.missouri.edu/~gdesouza/Research/Conference_CDs/IEEE_WCCI_2020/CEC/Papers/E-24183.pdf
 https://www.sciencedirect.com/science/article/pii/S0167404822000591
+https://wiki.python.org/moin/PyQt/Creating%20a%20widget%20with%20a%20fixed%20aspect%20ratio
