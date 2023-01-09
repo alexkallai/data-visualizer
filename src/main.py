@@ -1,11 +1,12 @@
-import file
-from tkinter import filedialog as fd
+from PyQt5.QtWidgets import QApplication
+from main_window import MainWindow
+import sys
 
+def main():
+    application = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(application.exec_())
 
 if __name__ == "__main__":
-    filenames = fd.askopenfilenames()
-    for filename in filenames:
-        with open(filename, "rb") as f:
-            opened_file = file.File(f.read())
-            opened_file.plot_2D_digraph()
-            opened_file.plot_3D_digraph()
+    main()
