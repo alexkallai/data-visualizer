@@ -3,9 +3,9 @@ import os
 
 
 # Return the file name
-def get_file_name(self):
+def get_file_name():
     return QFileDialog.getOpenFileName(
-        parent=self,
+        parent=None,
         caption="Open a file",
         directory=os.getcwd()
     )

@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QTabWidget, 
 from vispy.app import use_app
 import configparser
 from pathlib import Path
+import util
 import sys
 import os
 
@@ -11,6 +12,7 @@ from canvas2d import CanvasWrapper2D
 from canvas3d import CanvasWrapper3D
 from imagewidget import ImageWidget
 from controlwidget import ControlWidgets
+from file import File
 
 # Config
 filepath = Path(__file__).parent
@@ -50,7 +52,6 @@ class MainWindow(QMainWindow):
         self.image_widget = ImageWidget()
 
         self.controls = ControlWidgets()
-        #main_layout.addWidget(self.image_widget)
 
         # Initialize tabs
         self.tabs = QTabWidget()
@@ -59,7 +60,16 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.canvas_wrapper_3D.canvas.native, "3D view")
         # Add widgets
         main_layout.addWidget(self.controls)
+        main_layout.addWidget(self.image_widget)
         main_layout.addWidget(self.tabs)
 
         central_widget.setLayout(main_layout)
         self.setCentralWidget(central_widget)
+        self._connect_controls()
+
+    def _connect_controls(self):
+        self.controls.open_button.clicked.connect(self.set_file)
+    
+    def set_file(self):
+        self.file = File()
+        self.image_widget.set_image(self.file.get_qpixmap_from_PIL_image(self.file.get_byteplot_PIL_image()))

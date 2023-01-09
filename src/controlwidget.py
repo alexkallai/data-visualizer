@@ -7,9 +7,9 @@ class ControlWidgets(QWidget):
 
         layout = QVBoxLayout()
 
-        open_button = QPushButton("Open file")
-        open_button.clicked.connect(self.get_file_name)
-        layout.addWidget(open_button)
+        self.open_button = QPushButton("Open file")
+        #self.open_button.clicked.connect(self.get_file_name)
+        layout.addWidget(self.open_button)
 
         layout.addStretch(1)
         self.setLayout(layout)

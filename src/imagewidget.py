@@ -15,5 +15,5 @@ class ImageWidget(QWidget):
         self.setLayout(self.layout)
 
 
-    def set_image(self, image):
-        raise NotImplementedError
+    def set_image(self, image: QPixmap) -> None:
+        self.label.setPixmap(image)
