@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QTabWidget, QLabel
+from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QFileDialog, QTabWidget, QLabel
 from vispy.app import use_app
 import configparser
 from pathlib import Path
@@ -10,6 +10,7 @@ import os
 # Local imports
 from canvas2d import CanvasWrapper2D
 from canvas3d import CanvasWrapper3D
+from previewcanvas import PreviewCanvas
 from imagewidget import ImageWidget
 from controlwidget import ControlWidgets
 from file import File
@@ -30,11 +31,15 @@ class MainWindow(QMainWindow):
 
         # Set window geometry and location
         self.setGeometry(
-            int( config["general"]["WINDOW_X_COORD"] ),
-            int( config["general"]["WINDOW_Y_COORD"] ),
+            0,
+            0,
             int( config["general"]["WINDOW_WIDTH"]   ),
             int( config["general"]["WINDOW_HEIGHT"]  )
                          )
+        qtRectangle = self.frameGeometry()
+        centerPoint = QDesktopWidget().availableGeometry().center()
+        qtRectangle.moveCenter(centerPoint)
+        self.move(qtRectangle.topLeft())
         # Set window title
         self.setWindowTitle("Data Visualizer")
 
@@ -47,9 +52,11 @@ class MainWindow(QMainWindow):
         # Set main layout to horizontal box layout so widget sections are side-by-side
         main_layout = QtWidgets.QHBoxLayout()
         self.canvas_wrapper_2D = CanvasWrapper2D()
+        self.canvas_wrapper_hilbert = CanvasWrapper2D()
         self.canvas_wrapper_3D = CanvasWrapper3D()
 
-        self.image_widget = ImageWidget()
+        #self.image_widget = ImageWidget()
+        self.image_widget_canvas = PreviewCanvas()
 
         self.controls = ControlWidgets()
 
@@ -58,9 +65,11 @@ class MainWindow(QMainWindow):
         # Add canvas.native as a widget, which is a low level widget
         self.tabs.addTab(self.canvas_wrapper_2D.canvas.native, "2D view")
         self.tabs.addTab(self.canvas_wrapper_3D.canvas.native, "3D view")
+        self.tabs.addTab(self.canvas_wrapper_hilbert.canvas.native, "Hilbert curve view")
         # Add widgets
         main_layout.addWidget(self.controls)
-        main_layout.addWidget(self.image_widget)
+        #main_layout.addWidget(self.image_widget)
+        main_layout.addWidget(self.image_widget_canvas.canvas.native)
         main_layout.addWidget(self.tabs)
 
         central_widget.setLayout(main_layout)
@@ -72,4 +81,7 @@ class MainWindow(QMainWindow):
     
     def set_file(self):
         self.file = File()
-        self.image_widget.set_image(self.file.get_qpixmap_from_PIL_image(self.file.get_byteplot_PIL_image()))
+        if hasattr(self.file, "raw_binary_file"):
+            self.image_widget_canvas.set_image(self.file.get_byteplot_PIL_image())
+            self.canvas_wrapper_2D.set_image(self.file.get_2D_digraph_image())
+            self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())
