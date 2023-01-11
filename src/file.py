@@ -1,9 +1,10 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import colors, cm
-from PIL import ImageQt
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QFileDialog
+from hilbert import encode, decode
+import math
 import os
 
 
@@ -16,17 +17,20 @@ class File:
     def __init__(self, path=None) -> None:
         if path == None:
             path, filter = self.get_file_name()
-        try:
-            with open(path, "rb") as f:
-                raw_binary_file  = f.read()
-        except Exception as e:
-            print(f"There was problem with reading in the file: \n{e}")
+        if path:
+            try:
+                with open(path, "rb") as f:
+                    raw_binary_file  = f.read()
+            except Exception as e:
+                print(f"There was problem with reading in the file: \n{e}")
+                return
+        else:
             return
 
         self.raw_binary_file = raw_binary_file
         self.size_in_bytes: int = len(raw_binary_file)
-        self.hexa_pair_array = self.generate_hexa_pair_array()
-        self.hexa_pair_unique_array, self.hexa_pair_unique_array_counts = self.get_unique_array_and_counts(self.hexa_pair_array)
+        #self.hexa_pair_array = self.generate_hexa_pair_array()
+        #self.hexa_pair_unique_array, self.hexa_pair_unique_array_counts = self.get_unique_array_and_counts(self.hexa_pair_array)
 
     # Return the file name
     def get_file_name(self):
@@ -46,10 +50,42 @@ class File:
         for index, byte in enumerate(slice):
             if index == array_length - 1:
                 break
-            hexa_pair_array[index][0] = byte # byte plus next byte
+            hexa_pair_array[index][0] = byte # current byte
             hexa_pair_array[index][1] = slice[index+1] # byte plus next byte
             hexa_pair_array[index][2] = index
         return hexa_pair_array
+
+    def get_2D_digraph_image(self, slice=None):
+        """
+        This function returns the 256 x 256 (1 byte) sized image where the
+        values are the number of occurrences of the plotted (byte, byte+1) pair
+        """
+        
+        if not slice:
+            slice = self.raw_binary_file
+        # the first and last element will only be drawn once
+        # and the +1 is for the odd length
+        array_length = int((len(slice) + 1 ) / 2) - 2
+        digraph_image = np.zeros(shape=(256, 256), dtype=np.uint16)
+        for index, byte in enumerate(slice):
+            if index == array_length - 1:
+                break
+            digraph_image[byte][slice[index+1]] += 1 # current byte and the next
+        return digraph_image
+    
+    def get_2D_hilbert_image(self, slice=None, bits_per_dimension = 1) -> np.ndarray:
+        """
+        This function returns the ? x ? sized image that is the 2D representation
+        of the 1D byte series
+        """
+
+        if not slice:
+            slice = self.raw_binary_file
+        
+        slice = np.frombuffer(slice, dtype=np.uint8)
+        #hilbert_dimension = int( math.sqrt(len(slice)) ) + 1
+        #hilbert_image = np.zeros(shape=(hilbert_dimension, hilbert_dimension), dtype=)
+        return decode(locs=slice, num_dims=1, num_bits=bits_per_dimension)
     
     def get_unique_array_and_counts(self, array):
         return np.unique(array, return_counts=True, axis=0)
@@ -132,16 +168,25 @@ class File:
                     norm=normalize)
         plt.show()
 
-    def get_byteplot_PIL_image(self, width = 40) -> np.ndarray:
+    def get_byteplot_PIL_image(self, width = 40, max_height = 1000) -> np.ndarray:
         array = np.frombuffer(self.raw_binary_file, dtype=np.uint8)
-        lines = int(self.size_in_bytes / width) + 1
-        array2 = np.zeros( (lines, width), dtype=np.uint8 )
+        number_of_lines = int(self.size_in_bytes / width) + 1
+        array2 = np.zeros( (number_of_lines, width), dtype=np.uint8 )
         for index, byte in enumerate(array):
             line_idx = index % width
             row_idx = int(index / width)
             array2[row_idx][line_idx] = byte
-        plt.imshow(array2, interpolation='none')
-        plt.show()
+
+        #runner_index = 0
+        #increment = 1
+        #while runner_index < number_of_lines:
+            #line_idx = runner_index % width
+            #row_idx = int(runner_index / width)
+            #array2[row_idx][line_idx] = byte
+            #runner_index += increment
+
+        #plt.imshow(array2, interpolation='none')
+        #plt.show()
         return array2
 
     def get_qpixmap_from_PIL_image(self, image: np.ndarray) -> QPixmap:
@@ -153,4 +198,4 @@ class File:
 if __name__ == "__main__":
     testfile = File(str(__file__))
     image = testfile.get_byteplot_PIL_image()
-    testfile.get_qpixmap_from_PIL_image(image)
+    testfile.get_2D_digraph_image()
