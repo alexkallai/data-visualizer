@@ -10,6 +10,8 @@ class ImageWidget(QWidget):
         self.label = QLabel(self)
         self.picture = QPixmap(None)
         self.label.setPixmap(self.picture)
+        self.label.setScaledContents(True)
+        self.label.setMinimumWidth(200)
         self.layout.addWidget(self.label)
 
         self.setLayout(self.layout)

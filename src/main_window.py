@@ -52,6 +52,7 @@ class MainWindow(QMainWindow):
         # Set main layout to horizontal box layout so widget sections are side-by-side
         main_layout = QtWidgets.QHBoxLayout()
         self.canvas_wrapper_2D = CanvasWrapper2D()
+        #self.canvas_wrapper_2D = PreviewCanvas()
         self.canvas_wrapper_hilbert = CanvasWrapper2D()
         self.canvas_wrapper_3D = CanvasWrapper3D()
 
@@ -84,4 +85,4 @@ class MainWindow(QMainWindow):
         if hasattr(self.file, "raw_binary_file"):
             self.image_widget_canvas.set_image(self.file.get_byteplot_PIL_image())
             self.canvas_wrapper_2D.set_image(self.file.get_2D_digraph_image())
-            self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())
+            #self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())

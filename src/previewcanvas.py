@@ -2,7 +2,6 @@ from vispy.scene import SceneCanvas, visuals
 import numpy as np
 
 
-
 class PreviewCanvas:
     def __init__(self):
         self.canvas = SceneCanvas()

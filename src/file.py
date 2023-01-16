@@ -57,7 +57,7 @@ class File:
 
     def get_2D_digraph_image(self, slice=None):
         """
-        This function returns the 256 x 256 (1 byte) sized image where the
+        This function returns the 256 x 256 (1 byte) pixels sized image where the
         values are the number of occurrences of the plotted (byte, byte+1) pair
         """
         
@@ -168,26 +168,39 @@ class File:
                     norm=normalize)
         plt.show()
 
-    def get_byteplot_PIL_image(self, width = 40, max_height = 1000) -> np.ndarray:
-        array = np.frombuffer(self.raw_binary_file, dtype=np.uint8)
-        number_of_lines = int(self.size_in_bytes / width) + 1
-        array2 = np.zeros( (number_of_lines, width), dtype=np.uint8 )
-        for index, byte in enumerate(array):
-            line_idx = index % width
-            row_idx = int(index / width)
-            array2[row_idx][line_idx] = byte
+    
+    def get_byteplot_PIL_image(self, max_width=20, ratio=2) -> np.ndarray:
+        """
+        width: maximum number of pixels allowed in the output (NOTE: it's after downsampling)
+        ratio: y / x (height / width)
+        """
 
-        #runner_index = 0
-        #increment = 1
-        #while runner_index < number_of_lines:
-            #line_idx = runner_index % width
-            #row_idx = int(runner_index / width)
-            #array2[row_idx][line_idx] = byte
-            #runner_index += increment
+        # Read in the file
+        array1D = np.frombuffer(self.raw_binary_file, dtype=np.uint8)
+        # Create a suitably sized array
+        side_width = int(math.sqrt(self.size_in_bytes / ratio))
+        side_height = int(self.size_in_bytes / side_width)
+        side_width += 1
+        side_height += 1
+        array2D = np.zeros( ( side_height, side_width), dtype=np.uint8 )
 
-        #plt.imshow(array2, interpolation='none')
-        #plt.show()
-        return array2
+        print(f"Init width: { side_width}")
+        print(f"Init height: { side_height}")
+        print(f"Len: {self.size_in_bytes}")
+
+        # Fill the array
+        for index, byte in enumerate(array1D):
+            line_idx = index % side_width
+            row_idx = int(index / side_width)
+            array2D[row_idx][line_idx] = byte
+        
+        # Downsample the array by keeping its ratio ???
+        sampling_no = max_width / side_width
+        if not sampling_no > 1:
+            sampling_no = int(sampling_no) + 1
+            array2D = array2D[::sampling_no, ::sampling_no]
+
+        return array2D
 
     def get_qpixmap_from_PIL_image(self, image: np.ndarray) -> QPixmap:
         height, width = image.shape
