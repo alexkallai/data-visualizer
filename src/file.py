@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from matplotlib import colors, cm
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QFileDialog
-from hilbert import encode, decode
+from hilbertcurve.hilbertcurve import HilbertCurve
 import math
 import os
 
@@ -73,20 +73,43 @@ class File:
             digraph_image[byte][slice[index+1]] += 1 # current byte and the next
         return digraph_image
     
-    def get_2D_hilbert_image(self, slice=None, bits_per_dimension = 1) -> np.ndarray:
+    def get_hilbert_iterations_number(self):
+        """
+        Iteration 1 - 4 members:  4^x -> x = 1
+        Iteration 2 - 16 members: 4^x -> x = 2
+        Iteration 3 - 64 members: 4^x -> x = 3
+        x = log(length) / log(4)
+        """
+
+        return math.ceil( math.log10(self.size_in_bytes) / math.log10(4) )
+
+    def get_2D_hilbert_image(self, slice=None) -> np.ndarray:
         """
         This function returns the ? x ? sized image that is the 2D representation
         of the 1D byte series
+        The hilbert curve's size _quadruples_ in 2D every iteration!
         """
 
         if not slice:
             slice = self.raw_binary_file
-        
+
+        NUMBER_OF_DIMENSIONS = 2
+        number_of_iterations = self.get_hilbert_iterations_number()
+        print(f"Number of hilber iterations: {number_of_iterations}")
+        hilbert_curve = HilbertCurve(number_of_iterations, NUMBER_OF_DIMENSIONS)
+
         slice = np.frombuffer(slice, dtype=np.uint8)
-        #hilbert_dimension = int( math.sqrt(len(slice)) ) + 1
-        #hilbert_image = np.zeros(shape=(hilbert_dimension, hilbert_dimension), dtype=)
-        return decode(locs=slice, num_dims=1, num_bits=bits_per_dimension)
-    
+        # Create a suitably sized array
+        numpy_array_side_length = int(math.pow(2, number_of_iterations))
+        hilbert_array = np.zeros( ( numpy_array_side_length, numpy_array_side_length), dtype=np.uint8 )
+
+        for index, byte in enumerate(slice):
+            h_x, h_y = hilbert_curve.point_from_distance(index)
+            #print(h_x, h_y, byte)
+            hilbert_array[h_y][h_x] = byte
+
+        return hilbert_array
+
     def get_unique_array_and_counts(self, array):
         return np.unique(array, return_counts=True, axis=0)
 
@@ -167,6 +190,14 @@ class File:
                     cmap="magma",
                     norm=normalize)
         plt.show()
+    
+    def get_2D_array_sizes_with_aspect_ratio(self, length: int, aspect_ratio: int) -> tuple[int, int]:
+        side_width = int(math.sqrt(length / aspect_ratio))
+        side_height = int(length / side_width)
+        side_width += 1
+        side_height += 1
+        
+        return side_width, side_height
 
     
     def get_byteplot_PIL_image(self, max_width=20, ratio=2) -> np.ndarray:
@@ -177,11 +208,8 @@ class File:
 
         # Read in the file
         array1D = np.frombuffer(self.raw_binary_file, dtype=np.uint8)
+        side_width, side_height = self.get_2D_array_sizes_with_aspect_ratio(self.size_in_bytes, ratio)
         # Create a suitably sized array
-        side_width = int(math.sqrt(self.size_in_bytes / ratio))
-        side_height = int(self.size_in_bytes / side_width)
-        side_width += 1
-        side_height += 1
         array2D = np.zeros( ( side_height, side_width), dtype=np.uint8 )
 
         print(f"Init width: { side_width}")
@@ -211,4 +239,5 @@ class File:
 if __name__ == "__main__":
     testfile = File(str(__file__))
     image = testfile.get_byteplot_PIL_image()
+    testfile.get_2D_hilbert_image()
     testfile.get_2D_digraph_image()
