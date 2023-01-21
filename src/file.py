@@ -4,8 +4,14 @@ from matplotlib import colors, cm
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QFileDialog
 from hilbertcurve.hilbertcurve import HilbertCurve
+import hashlib
+from pathlib import Path
 import math
 import os
+
+# Nim imports
+#import nimporter
+#import analysis
 
 
 
@@ -15,8 +21,11 @@ class File:
     """
 
     def __init__(self, path=None) -> None:
+        self.path = None
+
         if path == None:
             path, filter = self.get_file_name()
+            self.path = path
         if path:
             try:
                 with open(path, "rb") as f:
@@ -27,13 +36,15 @@ class File:
         else:
             return
 
-        self.raw_binary_file = raw_binary_file
+        self.raw_binary_file: bytes = raw_binary_file
         self.size_in_bytes: int = len(raw_binary_file)
+        self.folder_path = self.path
+        self.file_name = os.path.split(self.path)[-1]
         #self.hexa_pair_array = self.generate_hexa_pair_array()
         #self.hexa_pair_unique_array, self.hexa_pair_unique_array_counts = self.get_unique_array_and_counts(self.hexa_pair_array)
 
     # Return the file name
-    def get_file_name(self):
+    def get_file_name(self) -> tuple[str, str]:
         return QFileDialog.getOpenFileName(
             parent=None,
             caption="Open a file",
@@ -234,6 +245,12 @@ class File:
         height, width = image.shape
         qt_image = QImage(image, width, height, width, QImage.Format_Grayscale8)
         return QPixmap(qt_image)
+    
+    def sha256_hash(self) -> str:
+        return hashlib.sha256(self.raw_binary_file).hexdigest()
+
+    def md5_hash(self) -> str:
+        return hashlib.md5(self.raw_binary_file).hexdigest()
 
 
 if __name__ == "__main__":

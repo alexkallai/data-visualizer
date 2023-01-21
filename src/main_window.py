@@ -1,5 +1,6 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QFileDialog, QTabWidget, QLabel
+#from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QFileDialog, QTabWidget, QLabel, QWidget, QHBoxLayout
+from PyQt5 import QtGui
 from vispy.app import use_app
 import configparser
 from pathlib import Path
@@ -42,15 +43,13 @@ class MainWindow(QMainWindow):
         self.move(qtRectangle.topLeft())
         # Set window title
         self.setWindowTitle("Data Visualizer")
-
-        # TODO icon
-        #from PyQt5.QtGui import QIcon
-        #self.setWindowIcon()
+        # Set window icon
+        self.setWindowIcon(QtGui.QIcon("src/window_icon.ico"))
 
         # Initialize the central widget
-        central_widget = QtWidgets.QWidget()
+        central_widget = QWidget()
         # Set main layout to horizontal box layout so widget sections are side-by-side
-        main_layout = QtWidgets.QHBoxLayout()
+        main_layout = QHBoxLayout()
         self.canvas_wrapper_2D = CanvasWrapper2D()
         #self.canvas_wrapper_2D = PreviewCanvas()
         self.canvas_wrapper_hilbert = CanvasWrapper2D()
@@ -83,6 +82,12 @@ class MainWindow(QMainWindow):
     def set_file(self):
         self.file = File()
         if hasattr(self.file, "raw_binary_file"):
+            # Set the fields
+            self.controls.set_filename(self.file.file_name)
+            self.controls.set_path(self.file.folder_path)
+            self.controls.set_sha256(self.file.sha256_hash())
+            self.controls.set_md5(self.file.md5_hash())
+            # Set the images
             self.image_widget_canvas.set_image(self.file.get_byteplot_PIL_image())
             self.canvas_wrapper_2D.set_image(self.file.get_2D_digraph_image())
             self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())
