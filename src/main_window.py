@@ -1,14 +1,11 @@
 #from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QFileDialog, QTabWidget, QLabel, QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QDesktopWidget, QTabWidget, QMainWindow, QWidget, QHBoxLayout
 from PyQt5 import QtGui
 from superqt import QRangeSlider
 from qtpy.QtCore import Qt
 from vispy.app import use_app
 import configparser
 from pathlib import Path
-import util
-import sys
-import os
 
 # Local imports
 from canvas2d import CanvasWrapper2D
