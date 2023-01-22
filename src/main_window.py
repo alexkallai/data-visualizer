@@ -53,10 +53,10 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         # Set main layout to horizontal box layout so widget sections are side-by-side
         main_layout = QHBoxLayout()
-        #main_layout = QFormLayout()
         self.canvas_wrapper_2D = CanvasWrapper2D()
         #self.canvas_wrapper_2D = PreviewCanvas()
         self.canvas_wrapper_hilbert = CanvasWrapper2D()
+        self.canvas_wrapper_byte_histogram = CanvasWrapper2D()
         self.canvas_wrapper_3D = CanvasWrapper3D()
 
         self.image_preview_widget_canvas_1 = PreviewCanvas()
@@ -80,6 +80,7 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.canvas_wrapper_2D.canvas.native, "2D view")
         self.tabs.addTab(self.canvas_wrapper_3D.canvas.native, "3D view")
         self.tabs.addTab(self.canvas_wrapper_hilbert.canvas.native, "Hilbert curve view")
+        self.tabs.addTab(self.canvas_wrapper_byte_histogram.canvas.native, "Byte histogram")
         # Add widgets
         main_layout.addWidget(self.controls)
         main_layout.addWidget(self.range_slider_1)
@@ -108,4 +109,4 @@ class MainWindow(QMainWindow):
             self.image_preview_widget_canvas_2.set_image(self.file.get_byteplot_PIL_image())
             self.canvas_wrapper_2D.set_image(self.file.get_2D_digraph_image())
             self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())
-            #self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())
+            self.canvas_wrapper_byte_histogram.set_image(self.file.get_2D_hilbert_image())

@@ -20,6 +20,7 @@ class StatusBarLayout(QWidget):
                       self.SHA256_label,
                       self.MD5_label):
             label.setFont(QFont("MonoSpace", pointSize=9, weight=500))
+            label.setAlignment(QtCore.Qt.AlignLeft)
 
         # Lines
         self.filename_edit =  QLabel("-")
@@ -34,7 +35,7 @@ class StatusBarLayout(QWidget):
                       self.MD5_edit):
             label.setFont(QFont("MonoSpace", pointSize=9, weight=5))
             label.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
-            #label.setWordWrap(True)
+            label.setAlignment(QtCore.Qt.AlignLeft)
 
         self.row_layout_1 = QHBoxLayout()
         self.row_layout_2 = QHBoxLayout()
