@@ -25,7 +25,6 @@ class File:
 
         if path == None:
             path, filter = self.get_file_name()
-            self.path = path
         if path:
             try:
                 with open(path, "rb") as f:
@@ -35,11 +34,12 @@ class File:
                 return
         else:
             return
+        self.path = path
 
         self.raw_binary_file: bytes = raw_binary_file
         self.size_in_bytes: int = len(raw_binary_file)
         self.folder_path = self.path
-        self.file_name = os.path.split(self.path)[-1]
+        self.file_name = str(os.path.split(self.path)[-1])
         #self.hexa_pair_array = self.generate_hexa_pair_array()
         #self.hexa_pair_unique_array, self.hexa_pair_unique_array_counts = self.get_unique_array_and_counts(self.hexa_pair_array)
 
@@ -106,7 +106,7 @@ class File:
 
         NUMBER_OF_DIMENSIONS = 2
         number_of_iterations = self.get_hilbert_iterations_number()
-        print(f"Number of hilber iterations: {number_of_iterations}")
+        print(f"Number of hilbert curve iterations: {number_of_iterations}")
         hilbert_curve = HilbertCurve(number_of_iterations, NUMBER_OF_DIMENSIONS)
 
         slice = np.frombuffer(slice, dtype=np.uint8)
@@ -211,7 +211,7 @@ class File:
         return side_width, side_height
 
     
-    def get_byteplot_PIL_image(self, max_width=20, ratio=2) -> np.ndarray:
+    def get_byteplot_PIL_image(self, max_width=400, ratio=4, downsample=False) -> np.ndarray:
         """
         width: maximum number of pixels allowed in the output (NOTE: it's after downsampling)
         ratio: y / x (height / width)
@@ -234,12 +234,15 @@ class File:
             array2D[row_idx][line_idx] = byte
         
         # Downsample the array by keeping its ratio ???
-        sampling_no = max_width / side_width
-        if not sampling_no > 1:
-            sampling_no = int(sampling_no) + 1
-            array2D = array2D[::sampling_no, ::sampling_no]
+        sampling_no = side_width / max_width
+        if sampling_no > 1 and downsample:
+            sampling_no = int(sampling_no) 
+            return array2D[::sampling_no, ::sampling_no]
 
         return array2D
+    
+    def apply_colormap_to_image(array: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
 
     def get_qpixmap_from_PIL_image(self, image: np.ndarray) -> QPixmap:
         height, width = image.shape

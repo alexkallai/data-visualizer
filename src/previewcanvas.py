@@ -5,6 +5,7 @@ import numpy as np
 class PreviewCanvas:
     def __init__(self):
         self.canvas = SceneCanvas()
+        #self.canvas.size = (200, 0)
         self.grid = self.canvas.central_widget.add_grid()
 
         #self.view_top = self.grid.add_view(0, 0, bgcolor='black')
@@ -27,6 +28,7 @@ class PreviewCanvas:
     
     def set_image(self, image: np.ndarray):
         self.image.set_data(image)
+        self.view_top.camera.set_range(x=(0, image.shape[1]), y=(0, image.shape[0]), margin=0)
         #self.image._update_colortransform_clim()
         #self.image.update()
         self.view_top.update()

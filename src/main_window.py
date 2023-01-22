@@ -1,6 +1,8 @@
 #from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QFileDialog, QTabWidget, QLabel, QWidget, QHBoxLayout
 from PyQt5 import QtGui
+from superqt import QRangeSlider
+from qtpy.QtCore import Qt
 from vispy.app import use_app
 import configparser
 from pathlib import Path
@@ -55,8 +57,18 @@ class MainWindow(QMainWindow):
         self.canvas_wrapper_hilbert = CanvasWrapper2D()
         self.canvas_wrapper_3D = CanvasWrapper3D()
 
-        #self.image_widget = ImageWidget()
-        self.image_widget_canvas = PreviewCanvas()
+        self.image_widget = ImageWidget()
+        self.image_preview_widget_canvas = PreviewCanvas()
+        # Range slider 1
+        self.range_slider_1 = QRangeSlider(Qt.Orientation.Vertical)
+        self.range_slider_1.setBarMovesAllHandles(True)
+        self.range_slider_1.setRange(0, 1000)
+        self.range_slider_1.setValue((0, 1000))
+        # Range slider 2
+        self.range_slider_2 = QRangeSlider(Qt.Orientation.Vertical)
+        self.range_slider_2.setBarMovesAllHandles(True)
+        self.range_slider_2.setRange(0, 1000)
+        self.range_slider_2.setValue((0, 1000))
 
         self.controls = ControlWidgets()
 
@@ -68,8 +80,10 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.canvas_wrapper_hilbert.canvas.native, "Hilbert curve view")
         # Add widgets
         main_layout.addWidget(self.controls)
-        #main_layout.addWidget(self.image_widget)
-        main_layout.addWidget(self.image_widget_canvas.canvas.native)
+        main_layout.addWidget(self.range_slider_1)
+        main_layout.addWidget(self.image_widget)
+        main_layout.addWidget(self.range_slider_2)
+        main_layout.addWidget(self.image_preview_widget_canvas.canvas.native)
         main_layout.addWidget(self.tabs)
 
         central_widget.setLayout(main_layout)
@@ -88,7 +102,8 @@ class MainWindow(QMainWindow):
             self.controls.set_sha256(self.file.sha256_hash())
             self.controls.set_md5(self.file.md5_hash())
             # Set the images
-            self.image_widget_canvas.set_image(self.file.get_byteplot_PIL_image())
+            self.image_preview_widget_canvas.set_image(self.file.get_byteplot_PIL_image())
+            self.image_widget.set_image(self.file.get_qpixmap_from_PIL_image(self.file.get_byteplot_PIL_image()))
             self.canvas_wrapper_2D.set_image(self.file.get_2D_digraph_image())
             self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())
             #self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())
