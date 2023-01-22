@@ -5,9 +5,11 @@ import numpy as np
 class PreviewCanvas:
     def __init__(self):
         self.canvas = SceneCanvas()
+        # Define the auto-fit range variables
         self.x_range = 100
         self.y_range = 100
-        #self.canvas.size = (200, 0)
+        # Set the width of the widget
+        self.canvas.size = (200, 0)
         self.grid = self.canvas.central_widget.add_grid()
 
         #self.view_top = self.grid.add_view(0, 0, bgcolor='black')
@@ -33,8 +35,6 @@ class PreviewCanvas:
         self.x_range = image.shape[1]
         self.y_range = image.shape[0]
         self.view_top.camera.set_range(x=(0, self.x_range), y=(0, self.y_range), margin=0)
-        #self.image._update_colortransform_clim()
-        #self.image.update()
         self.view_top.update()
     
     def refit_image(self) -> None:
