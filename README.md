@@ -22,8 +22,32 @@ It's running on Windows and Linux as well, and because of Vispy, the graphics pe
 - Byteplot display with arbitrary width
 
 #### Screenshots (may be old)
-![2D digraph](./screenshots/2d-digraph-view.png)
-![Hilbert curve view](./screenshots/2d-hilbert-curve-view.png)
+![2D digraph](./screenshots/2d-digraph-view.png)  ![Hilbert curve view](./screenshots/2d-hilbert-curve-view.png)
+
+#### Usage:
+```
+WINDOWS
+# Create venv
+python -m venv venv
+# Enter venv
+.\venv\Scripts\activate.bat
+# Install dependencies
+pip install -r requirements_windows.txt
+# If everything is ok, start main.py
+python .\src\main.py
+
+LINUX
+# Create venv
+python -m venv venv
+# Enter venv
+source venv/bin/activate
+# Install dependencies
+pip install -r requirements_linux.txt
+# If everything is ok, start main.py
+python ./src/main.py
+
+(I couldn't generate a release yet because Vispy and Pyinstaller are not the best of friends)
+```
 
 ### Links
 
