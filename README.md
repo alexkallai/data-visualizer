@@ -25,6 +25,7 @@ The main GUI components are built with [PyQt5](https://pypi.org/project/PyQt5/) 
 ### Links
 
 **Related links**
+
 [Derbycon 2012 talk that inspired this project](https://www.youtube.com/watch?v=4bM3Gut1hIk)
 
 [Open source publication article](https://inside.battelle.org/blog-details/battelle-publishes-open-source-binary-visualization-tool)
@@ -32,6 +33,7 @@ The main GUI components are built with [PyQt5](https://pypi.org/project/PyQt5/) 
 [Original Github release (note, that this is not what was demoed, it's a Ghidra )](https://github.com/Battelle/cantordust)
 
 **Papers, concepts and useful stuff**
+
 [https://corte.si/posts/visualisation/entropy/index.html](https://corte.si/posts/visualisation/entropy/index.html)
 
 [https://inside.battelle.org/blog-details/battelle-publishes-open-source-binary-visualization-tool](https://inside.battelle.org/blog-details/battelle-publishes-open-source-binary-visualization-tool)
