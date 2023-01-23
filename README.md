@@ -2,7 +2,7 @@
 
 ### The goal of this project is to implement similar functions to [..cantor.dust..](https://sites.google.com/site/xxcantorxdustxx/) in Python
 
-The main GUI components are built with [PyQt5](https://pypi.org/project/PyQt5/) with [Vispy](https://vispy.org/gallery/scene/index.htm)
+The main GUI components are built with [PyQt5](https://pypi.org/project/PyQt5/) with [Vispy](https://vispy.org/gallery/scene/index.html)
 
 ### Features
 **Done:**
@@ -26,14 +26,22 @@ The main GUI components are built with [PyQt5](https://pypi.org/project/PyQt5/) 
 
 **Related links**
 [Derbycon 2012 talk that inspired this project](https://www.youtube.com/watch?v=4bM3Gut1hIk)
+
 [Open source publication article](https://inside.battelle.org/blog-details/battelle-publishes-open-source-binary-visualization-tool)
+
 [Original Github release (note, that this is not what was demoed, it's a Ghidra )](https://github.com/Battelle/cantordust)
 
 **Papers, concepts and useful stuff**
 [https://corte.si/posts/visualisation/entropy/index.html](https://corte.si/posts/visualisation/entropy/index.html)
+
 [https://inside.battelle.org/blog-details/battelle-publishes-open-source-binary-visualization-tool](https://inside.battelle.org/blog-details/battelle-publishes-open-source-binary-visualization-tool)
+
 [https://github.com/Battelle/cantordust](https://github.com/Battelle/cantordust)
+
 [https://gynvael.coldwind.pl/?id=199](https://gynvael.coldwind.pl/?id=199)
+
 [http://vigir.missouri.edu/~gdesouza/Research/Conference_CDs/IEEE_WCCI_2020/CEC/Papers/E-24183.pdf](http://vigir.missouri.edu/~gdesouza/Research/Conference_CDs/IEEE_WCCI_2020/CEC/Papers/E-24183.pdf)
+
 [https://www.sciencedirect.com/science/article/pii/S0167404822000591](https://www.sciencedirect.com/science/article/pii/S0167404822000591)
+
 [https://wiki.python.org/moin/PyQt/Creating%20a%20widget%20with%20a%20fixed%20aspect%20ratio](https://wiki.python.org/moin/PyQt/Creating%20a%20widget%20with%20a%20fixed%20aspect%20ratio)
