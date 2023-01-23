@@ -2,11 +2,12 @@
 
 ### The goal of this project is to implement similar functions to [..cantor.dust..](https://sites.google.com/site/xxcantorxdustxx/) in Python
 
-The main GUI components are built with [PyQt5](https://pypi.org/project/PyQt5/) with [Vispy](https://vispy.org/gallery/scene/index.html)
+The main GUI components are built with [PyQt5](https://pypi.org/project/PyQt5/) and with [Vispy](https://vispy.org/gallery/scene/index.html)
+It's running on Windows and Linux as well, and because of Vispy, the graphics performance is great because of the GPU utilization
 
 ### Features
 **Done:**
-- Heatmap display of file bytes for range selection
+- Heatmap display of byteplots of the file for range selection
 - 2D digraph heatmap represenation of file
 - 2D Hilbert curve representation of 
 
@@ -17,6 +18,8 @@ The main GUI components are built with [PyQt5](https://pypi.org/project/PyQt5/) 
 - Histogram display of selected section
 - Hex location selection by mouse
 - Change display type selection (heatmap colors etc.)
+- Improve load performance and memory management
+- Byteplot display with arbitrary width
 
 #### Screenshots (may be old)
 ![2D digraph](./screenshots/2d-digraph-view.png)
