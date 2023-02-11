@@ -216,28 +216,25 @@ class File:
     
     def get_byteplot_PIL_image(self, max_width=400, ratio=4, downsample=False) -> np.ndarray:
         """
-        width: maximum number of pixels allowed in the output (NOTE: it's after downsampling)
+        max_width: maximum number of pixels allowed in the output (NOTE: it's after downsampling)
         ratio: y / x (height / width)
+        downsample: if downsampling should happen
         """
 
         # Read in the file
-        array1D = np.frombuffer(self.raw_binary_file, dtype=np.uint8)
-        side_width, side_height = self.get_2D_array_sizes_with_aspect_ratio(self.size_in_bytes, ratio)
-        # Create a suitably sized array
-        array2D = np.zeros( ( side_height, side_width), dtype=np.uint8 )
+        width, height = self.get_2D_array_sizes_with_aspect_ratio(self.size_in_bytes, ratio)
 
-        print(f"Init width: { side_width}")
-        print(f"Init height: { side_height}")
+        print(f"Init width: { width}")
+        print(f"Init height: { height}")
         print(f"Len: {self.size_in_bytes}")
 
-        # Fill the array
-        for index, byte in enumerate(array1D):
-            line_idx = index % side_width
-            row_idx = int(index / side_width)
-            array2D[row_idx][line_idx] = byte
-        
+        # Pad the remaining space with zeroes by appending an empty array so the
+        # 1D array can be reshaped to 2D
+        array2D = np.append(self.raw_binary_file, np.zeros(((width*height)-self.size_in_bytes), np.uint8))
+        array2D = array2D.reshape((height, width))
+
         # Downsample the array by keeping its ratio ???
-        sampling_no = side_width / max_width
+        sampling_no = width / max_width
         if sampling_no > 1 and downsample:
             sampling_no = int(sampling_no) 
             return array2D[::sampling_no, ::sampling_no]
