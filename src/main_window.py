@@ -116,8 +116,6 @@ class MainWindow(QMainWindow):
             self.statusbar_layout.set_md5(self.file.md5_hash())
             print(f"set md5 {time.time() - start_time}")
             # Set the images
-            self.canvas_wrapper_byte_histogram.set_plot(self.file.raw_binary_file)
-            print(f"set histogram {time.time() - start_time}")
             self.image_preview_widget_canvas_1.set_image(self.file.get_byteplot_PIL_image())
             print(f"set canvas1 {time.time() - start_time}")
             self.image_preview_widget_canvas_2.set_image(self.file.get_byteplot_PIL_image())
@@ -126,3 +124,7 @@ class MainWindow(QMainWindow):
             print(f"set 2D digraph {time.time() - start_time}")
             self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())
             print(f"set hilbert {time.time() - start_time}")
+            self.canvas_wrapper_byte_histogram.set_plot(self.file.raw_binary_file)
+            print(f"set histogram {time.time() - start_time}")
+            self.canvas_wrapper_3D.set_data(*self.file.get_3D_hilbert_image() )
+            print(f"set 3D digraph {time.time() - start_time}")

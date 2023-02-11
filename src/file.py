@@ -87,7 +87,7 @@ class File:
 
         return digraph_image
     
-    def get_hilbert_iterations_number(self):
+    def get_2D_hilbert_iterations_number(self):
         """
         Iteration 1 - 4 members:  4^x -> x = 1
         Iteration 2 - 16 members: 4^x -> x = 2
@@ -108,7 +108,7 @@ class File:
             slice = self.raw_binary_file
 
         NUMBER_OF_DIMENSIONS = 2
-        number_of_iterations = self.get_hilbert_iterations_number()
+        number_of_iterations = self.get_2D_hilbert_iterations_number()
         print(f"Number of hilbert curve iterations: {number_of_iterations}")
         hilbert_curve = HilbertCurve(p=number_of_iterations, n=NUMBER_OF_DIMENSIONS, n_procs=-1)
 
@@ -124,14 +124,60 @@ class File:
 
         return hilbert_array
 
+    def get_3D_hilbert_iterations_number(self):
+        """
+        Iteration 1 - 8 members:   8^x -> x = 1
+        Iteration 2 - 64 members:  8^x -> x = 2
+        Iteration 3 - 512 members: 8^x -> x = 3
+        x = log(length) / log(4)
+        """
+
+        return math.ceil( math.log10(self.size_in_bytes) / math.log10(8) )
+
+    def get_3D_hilbert_image(self, slice=None) -> np.ndarray:
+        """
+        This function returns the ? x ? x ? sized image that is the 3D representation
+        of the 1D byte series
+        The hilbert curve's size _x8_ in 3D every iteration!
+        """
+
+        if not slice:
+            slice = self.raw_binary_file
+
+        NUMBER_OF_DIMENSIONS = 3
+        number_of_iterations = self.get_3D_hilbert_iterations_number()
+        print(f"Number of 3D hilbert curve iterations: {number_of_iterations}")
+        hilbert_curve = HilbertCurve(p=number_of_iterations, n=NUMBER_OF_DIMENSIONS, n_procs=-1)
+
+        slice = np.frombuffer(slice, dtype=np.uint8)
+        # Create a suitably sized array
+        array_side_len = int(math.pow(2, number_of_iterations))
+        hilbert_array = np.zeros( ( array_side_len, array_side_len, array_side_len), 
+                                    dtype=np.uint8 )
+        list_of_coords = np.zeros( (self.size_in_bytes, 3), dtype=np.uint8 )
+        list_of_colors = np.zeros( (self.size_in_bytes, 3), dtype=np.float32)
+
+        # Zip method
+        for index, point in enumerate(zip(slice,
+                         hilbert_curve.points_from_distances(distances=range(self.size_in_bytes)))):
+            hilbert_array[ point[1][1] ][ point[1][0] ][ point[1][2] ] = point[0]
+            list_of_coords[index][0] = point[1][0]
+            list_of_coords[index][1] = point[1][1]
+            list_of_coords[index][2] = point[1][2]
+            import random
+            list_of_colors[index][0] = random.random()
+            list_of_colors[index][1] = random.random()
+            list_of_colors[index][2] = random.random()
+
+        return list_of_coords, list_of_colors
+
     def get_unique_array_and_counts(self, array):
         return np.unique(array, return_counts=True, axis=0)
 
     def get_bin_file_slice(self, begin_percent=0, end_percent=100) -> bytes:
         # 0-100
-        array_length = len(self.raw_binary_file)
-        begin_percent_index = int((array_length * begin_percent) / 100)
-        end_percent_index = int((array_length * end_percent) / 100)
+        begin_percent_index = int((self.size_in_bytes* begin_percent) / 100)
+        end_percent_index = int((self.size_in_bytes* end_percent) / 100)
 
         return self.raw_binary_file[begin_percent_index:end_percent_index]
     

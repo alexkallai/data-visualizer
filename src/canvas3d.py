@@ -11,14 +11,29 @@ class CanvasWrapper3D:
         self.view = self.canvas.central_widget.add_view()
         scatter = visuals.Markers()
         scatter.set_data(
-            pos = np.full((20, 2), 10, dtype= np.uint32),
+            pos = np.empty((100, 3),  dtype= np.uint8),
             size = 5,
             #edge_width: float = 1,
             #edge_width_rel: Any | None = None,
             edge_color = 'black',
             face_color = 'white',
             symbol = 'o')
-        self.view.add(scatter)
+        #self.view.add(scatter)
         self.view.camera = "arcball"
         # axis for navigation
         self.axis = visuals.XYZAxis(parent=self.view.scene)
+    
+    def set_data(self, data: np.ndarray, colors: np.ndarray):
+        #del self.view
+        #self.view = self.canvas.central_widget.add_view()
+        scatter = visuals.Markers()
+        scatter.set_data(
+            pos = data,
+            size = 5,
+            #edge_width: float = 1,
+            #edge_width_rel: Any | None = None,
+            edge_color = 'black',
+            face_color = colors,
+            symbol = 'o')
+        self.view.add(scatter)
+        self.view.update()
