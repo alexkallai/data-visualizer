@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QTextEdit, QPushButton, QFileDialog, QHBoxLayout, QFormLayout
+from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout, QFormLayout
 from PyQt5 import QtCore
 from PyQt5.QtGui import *
 
