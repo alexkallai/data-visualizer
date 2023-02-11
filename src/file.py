@@ -8,6 +8,8 @@ import hashlib
 from pathlib import Path
 import math
 import os
+from itertools import pairwise, groupby
+import sys
 
 # Nim imports
 #import nimporter
@@ -28,7 +30,7 @@ class File:
         if path:
             try:
                 with open(path, "rb") as f:
-                    raw_binary_file  = f.read()
+                    self.raw_binary_file  = np.frombuffer(f.read(), dtype=np.uint8)
             except Exception as e:
                 print(f"There was problem with reading in the file: \n{e}")
                 return
@@ -36,8 +38,8 @@ class File:
             return
         self.path = path
 
-        self.raw_binary_file: bytes = raw_binary_file
-        self.size_in_bytes: int = len(raw_binary_file)
+        print(f"The size of the bytes file object is: {sys.getsizeof(self.raw_binary_file)}")
+        self.size_in_bytes: int = len(self.raw_binary_file)
         self.folder_path = self.path
         self.file_name = str(os.path.split(self.path)[-1])
         #self.hexa_pair_array = self.generate_hexa_pair_array()
@@ -78,10 +80,11 @@ class File:
         # and the +1 is for the odd length
         array_length = int((len(slice) + 1 ) / 2) - 2
         digraph_image = np.zeros(shape=(256, 256), dtype=np.uint16)
-        for index, byte in enumerate(slice):
-            if index == array_length - 1:
-                break
-            digraph_image[byte][slice[index+1]] += 1 # current byte and the next
+
+        # itertool pairwise solution
+        for res in groupby(pairwise(slice)):
+            digraph_image[ res[0][0] ][ res[0][1] ] = len(list( res[1] )) 
+
         return digraph_image
     
     def get_hilbert_iterations_number(self):
@@ -107,17 +110,17 @@ class File:
         NUMBER_OF_DIMENSIONS = 2
         number_of_iterations = self.get_hilbert_iterations_number()
         print(f"Number of hilbert curve iterations: {number_of_iterations}")
-        hilbert_curve = HilbertCurve(number_of_iterations, NUMBER_OF_DIMENSIONS)
+        hilbert_curve = HilbertCurve(p=number_of_iterations, n=NUMBER_OF_DIMENSIONS, n_procs=-1)
 
         slice = np.frombuffer(slice, dtype=np.uint8)
         # Create a suitably sized array
-        numpy_array_side_length = int(math.pow(2, number_of_iterations))
-        hilbert_array = np.zeros( ( numpy_array_side_length, numpy_array_side_length), dtype=np.uint8 )
-
-        for index, byte in enumerate(slice):
-            h_x, h_y = hilbert_curve.point_from_distance(index)
-            #print(h_x, h_y, byte)
-            hilbert_array[h_y][h_x] = byte
+        hilbert_array_side_length = int(math.pow(2, number_of_iterations))
+        hilbert_array = np.zeros( ( hilbert_array_side_length, hilbert_array_side_length), dtype=np.uint8 )
+        
+        # Zip method
+        for point in zip(slice,
+                         hilbert_curve.points_from_distances(distances=range(self.size_in_bytes))):
+            hilbert_array[ point[1][1] ][ point[1][0] ] = point[0]
 
         return hilbert_array
 
