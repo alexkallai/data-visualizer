@@ -6,6 +6,7 @@ from qtpy.QtCore import Qt
 from vispy.app import use_app
 import configparser
 from pathlib import Path
+import time
 
 # Local imports
 from canvas2d import CanvasWrapper2D
@@ -14,6 +15,7 @@ from previewcanvas import PreviewCanvas
 from controlwidget import ControlWidgets
 from statusbarlayout import StatusBarLayout
 from file import File
+from plotwidget import PlotCanvasWrapper
 
 # Config
 filepath = Path(__file__).parent
@@ -56,7 +58,7 @@ class MainWindow(QMainWindow):
         self.canvas_wrapper_2D = CanvasWrapper2D()
         #self.canvas_wrapper_2D = PreviewCanvas()
         self.canvas_wrapper_hilbert = CanvasWrapper2D()
-        self.canvas_wrapper_byte_histogram = CanvasWrapper2D()
+        self.canvas_wrapper_byte_histogram = PlotCanvasWrapper()
         self.canvas_wrapper_3D = CanvasWrapper3D()
 
         self.image_preview_widget_canvas_1 = PreviewCanvas()
@@ -80,7 +82,8 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.canvas_wrapper_2D.canvas.native, "2D view")
         self.tabs.addTab(self.canvas_wrapper_3D.canvas.native, "3D view")
         self.tabs.addTab(self.canvas_wrapper_hilbert.canvas.native, "Hilbert curve view")
-        self.tabs.addTab(self.canvas_wrapper_byte_histogram.canvas.native, "Byte histogram")
+        #self.tabs.addTab(self.canvas_wrapper_byte_histogram.canvas.native, "Byte histogram")
+        self.tabs.addTab(self.canvas_wrapper_byte_histogram.plotcanvas.native, "Byte histogram")
         # Add widgets
         main_layout.addWidget(self.controls)
         main_layout.addWidget(self.range_slider_1)
@@ -97,16 +100,29 @@ class MainWindow(QMainWindow):
         self.controls.open_button.clicked.connect(self.set_file)
     
     def set_file(self):
+        start_time = time.time()
         self.file = File()
+        print(f"self.file init time: {time.time() - start_time}")
+        start_time = time.time()
+        print("TIME RESET")
         if hasattr(self.file, "raw_binary_file"):
             # Set the fields
             self.statusbar_layout.set_filename(self.file.file_name)
+            print(f"set filename {time.time() - start_time}")
             self.statusbar_layout.set_path(self.file.folder_path)
+            print(f"set path {time.time() - start_time}")
             self.statusbar_layout.set_sha256(self.file.sha256_hash())
+            print(f"set sha {time.time() - start_time}")
             self.statusbar_layout.set_md5(self.file.md5_hash())
+            print(f"set md5 {time.time() - start_time}")
             # Set the images
+            self.canvas_wrapper_byte_histogram.set_plot(self.file.raw_binary_file)
+            print(f"set histogram {time.time() - start_time}")
             self.image_preview_widget_canvas_1.set_image(self.file.get_byteplot_PIL_image())
+            print(f"set canvas1 {time.time() - start_time}")
             self.image_preview_widget_canvas_2.set_image(self.file.get_byteplot_PIL_image())
+            print(f"set canvas2 {time.time() - start_time}")
             self.canvas_wrapper_2D.set_image(self.file.get_2D_digraph_image())
+            print(f"set 2D digraph {time.time() - start_time}")
             self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())
-            self.canvas_wrapper_byte_histogram.set_image(self.file.get_2D_hilbert_image())
+            print(f"set hilbert {time.time() - start_time}")
