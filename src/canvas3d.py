@@ -26,13 +26,12 @@ class CanvasWrapper3D:
     def set_data(self, data: np.ndarray, colors: np.ndarray):
         #del self.view
         #self.view = self.canvas.central_widget.add_view()
-        scatter = visuals.Markers()
+        scatter = visuals.Markers(alpha=0.3)
         scatter.set_data(
             pos = data,
-            size = 5,
-            #edge_width: float = 1,
-            #edge_width_rel: Any | None = None,
-            edge_color = 'black',
+            size = 3,
+            edge_width = 0,
+            edge_color = 'white',
             face_color = colors,
             symbol = 'o')
         self.view.add(scatter)

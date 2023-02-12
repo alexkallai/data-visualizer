@@ -26,9 +26,12 @@ class CanvasWrapper2D:
     def set_image_colormap(self, cmap_name: str):
         print(f"Changing image colormap to {cmap_name}")
         self.image.cmap = cmap_name
+        self.view_top.update()
 
     def set_image(self, image: np.ndarray) -> None:
         self.image.set_data(image)
+        self.image.cmap = "viridis"
+        self.image.clim = "auto"
         self.x_range = image.shape[1]
         self.y_range = image.shape[0]
         self.view_top.camera.set_range(x=(0, self.x_range), y=(0, self.y_range), margin=0)

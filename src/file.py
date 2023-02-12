@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib import colors, cm
+from matplotlib import colors
+from matplotlib import colormaps
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QFileDialog
 from hilbertcurve.hilbertcurve import HilbertCurve
@@ -157,6 +158,11 @@ class File:
         list_of_coords = np.zeros( (self.size_in_bytes, 3), dtype=np.uint8 )
         list_of_colors = np.zeros( (self.size_in_bytes, 3), dtype=np.float32)
 
+        def map_byte_to_color(byte):
+            color_component = (byte/256)
+            viridis = colormaps['viridis']
+            return viridis(color_component)[:3]
+
         # Zip method
         for index, point in enumerate(zip(slice,
                          hilbert_curve.points_from_distances(distances=range(self.size_in_bytes)))):
@@ -165,9 +171,10 @@ class File:
             list_of_coords[index][1] = point[1][1]
             list_of_coords[index][2] = point[1][2]
             import random
-            list_of_colors[index][0] = random.random()
-            list_of_colors[index][1] = random.random()
-            list_of_colors[index][2] = random.random()
+            # TODO very slow:
+            list_of_colors[index] = map_byte_to_color(point[0])
+            #list_of_colors[index][1] = random.random()
+            #list_of_colors[index][2] = random.random()
 
         return list_of_coords, list_of_colors
 
