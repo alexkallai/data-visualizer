@@ -1,7 +1,7 @@
 #from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDesktopWidget, QTabWidget, QMainWindow, QWidget, QHBoxLayout, QFormLayout, QLabel
 from PyQt5 import QtGui
-from superqt import QRangeSlider
+from superqt import QRangeSlider, QLabeledRangeSlider
 from qtpy.QtCore import Qt
 from vispy.app import use_app
 import configparser
@@ -64,12 +64,12 @@ class MainWindow(QMainWindow):
         self.image_preview_widget_canvas_1 = PreviewCanvas()
         self.image_preview_widget_canvas_2 = PreviewCanvas()
         # Range slider 1
-        self.range_slider_1 = QRangeSlider(Qt.Orientation.Vertical)
+        self.range_slider_1 = QLabeledRangeSlider(Qt.Orientation.Vertical)
         self.range_slider_1.setBarMovesAllHandles(True)
         self.range_slider_1.setRange(0, 1000)
         self.range_slider_1.setValue((0, 1000))
         # Range slider 2
-        self.range_slider_2 = QRangeSlider(Qt.Orientation.Vertical)
+        self.range_slider_2 = QLabeledRangeSlider(Qt.Orientation.Vertical)
         self.range_slider_2.setBarMovesAllHandles(True)
         self.range_slider_2.setRange(0, 1000)
         self.range_slider_2.setValue((0, 1000))
@@ -97,34 +97,44 @@ class MainWindow(QMainWindow):
         self._connect_controls()
 
     def _connect_controls(self):
-        self.controls.open_button.clicked.connect(self.set_file)
+        self.controls.open_button.clicked.connect(self.set_new_file)
+        self.range_slider_1.sliderReleased.connect(self.slider_1_release_handler)
+        self.range_slider_2.sliderReleased.connect(self.slider_2_release_handler)
+        self.range_slider_1.sliderMoved.connect(self.slider_1_move_handler)
+        self.range_slider_2.sliderMoved.connect(self.slider_2_move_handler)
     
-    def set_file(self):
-        start_time = time.time()
+    def set_new_file(self):
         self.file = File()
-        print(f"self.file init time: {time.time() - start_time}")
-        start_time = time.time()
-        print("TIME RESET")
-        if hasattr(self.file, "raw_binary_file"):
+        self.set_file_pipeline()
+    
+    def set_statusbar(self):
             # Set the fields
             self.statusbar_layout.set_filename(self.file.file_name)
-            print(f"set filename {time.time() - start_time}")
             self.statusbar_layout.set_path(self.file.folder_path)
-            print(f"set path {time.time() - start_time}")
             self.statusbar_layout.set_sha256(self.file.sha256_hash())
-            print(f"set sha {time.time() - start_time}")
             self.statusbar_layout.set_md5(self.file.md5_hash())
-            print(f"set md5 {time.time() - start_time}")
+    
+    def set_file_pipeline(self):
+        if hasattr(self.file, "raw_binary_file"):
+            self.set_statusbar()
+
             # Set the images
             self.image_preview_widget_canvas_1.set_image(self.file.get_byteplot_PIL_image())
-            print(f"set canvas1 {time.time() - start_time}")
             self.image_preview_widget_canvas_2.set_image(self.file.get_byteplot_PIL_image())
-            print(f"set canvas2 {time.time() - start_time}")
             self.canvas_wrapper_2D.set_image(self.file.get_2D_digraph_image())
-            print(f"set 2D digraph {time.time() - start_time}")
             self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image())
-            print(f"set hilbert {time.time() - start_time}")
             self.canvas_wrapper_byte_histogram.set_plot(self.file.raw_binary_file)
-            print(f"set histogram {time.time() - start_time}")
             self.canvas_wrapper_3D.set_data(*self.file.get_3D_hilbert_image() )
-            print(f"set 3D digraph {time.time() - start_time}")
+
+    def slider_1_release_handler(self):
+        print("Slider 1 released")
+        print(self.range_slider_1.value())
+
+    def slider_2_release_handler(self):
+        print("Slider 2 released")
+
+    def slider_1_move_handler(self):
+        print("Slider 1 moved")
+
+    def slider_2_move_handler(self):
+        print("Slider 2 moved")

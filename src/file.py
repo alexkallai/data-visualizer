@@ -1,21 +1,25 @@
-import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import colors
-from matplotlib import colormaps
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QFileDialog
 from hilbertcurve.hilbertcurve import HilbertCurve
-import hashlib
+from itertools import groupby
+from matplotlib import colormaps
+from matplotlib import colors
+from matplotlib import pyplot as plt
 from pathlib import Path
+import hashlib
 import math
+import numpy as np
 import os
-from itertools import pairwise, groupby
 import sys
 
-# Nim imports
-#import nimporter
-#import analysis
-
+try:
+    from itertools import pairwise
+except:
+    # about 40% slower than itertools.pairwise,
+    # but that's available from python 3.10 only
+    def pairwise(iterable):
+        for x in zip(iterable, iterable[1:]):
+            yield x
 
 
 class File:
@@ -46,30 +50,15 @@ class File:
         #self.hexa_pair_array = self.generate_hexa_pair_array()
         #self.hexa_pair_unique_array, self.hexa_pair_unique_array_counts = self.get_unique_array_and_counts(self.hexa_pair_array)
 
-    # Return the file name
+    # Select the file and return the path
     def get_file_name(self) -> tuple[str, str]:
         return QFileDialog.getOpenFileName(
             parent=None,
             caption="Open a file",
             directory=os.getcwd()
         )
-    
-    def generate_hexa_pair_array(self, slice=None):
-        if not slice:
-            slice = self.raw_binary_file
-        # the first and last element will only be drawn once
-        # and the +1 is for the odd length
-        array_length = int((len(slice) + 1 ) / 2) - 2
-        hexa_pair_array = np.zeros(shape=(array_length, 3), dtype=np.uint16)
-        for index, byte in enumerate(slice):
-            if index == array_length - 1:
-                break
-            hexa_pair_array[index][0] = byte # current byte
-            hexa_pair_array[index][1] = slice[index+1] # byte plus next byte
-            hexa_pair_array[index][2] = index
-        return hexa_pair_array
 
-    def get_2D_digraph_image(self, slice=None):
+    def get_2D_digraph_image(self, slice=None) -> np.ndarray:
         """
         This function returns the 256 x 256 (1 byte) pixels sized image where the
         values are the number of occurrences of the plotted (byte, byte+1) pair
@@ -77,9 +66,7 @@ class File:
         
         if not slice:
             slice = self.raw_binary_file
-        # the first and last element will only be drawn once
-        # and the +1 is for the odd length
-        array_length = int((len(slice) + 1 ) / 2) - 2
+
         digraph_image = np.zeros(shape=(256, 256), dtype=np.uint16)
 
         # itertool pairwise solution
@@ -125,7 +112,7 @@ class File:
 
         return hilbert_array
 
-    def get_3D_hilbert_iterations_number(self):
+    def get_3D_hilbert_iterations_number(self) -> int:
         """
         Iteration 1 - 8 members:   8^x -> x = 1
         Iteration 2 - 64 members:  8^x -> x = 2
@@ -165,16 +152,13 @@ class File:
 
         # Zip method
         for index, point in enumerate(zip(slice,
-                         hilbert_curve.points_from_distances(distances=range(self.size_in_bytes)))):
+                                          hilbert_curve.points_from_distances(distances=range(self.size_in_bytes)))):
             hilbert_array[ point[1][1] ][ point[1][0] ][ point[1][2] ] = point[0]
             list_of_coords[index][0] = point[1][0]
             list_of_coords[index][1] = point[1][1]
             list_of_coords[index][2] = point[1][2]
-            import random
             # TODO very slow:
             list_of_colors[index] = map_byte_to_color(point[0])
-            #list_of_colors[index][1] = random.random()
-            #list_of_colors[index][2] = random.random()
 
         return list_of_coords, list_of_colors
 
@@ -183,27 +167,10 @@ class File:
 
     def get_bin_file_slice(self, begin_percent=0, end_percent=100) -> bytes:
         # 0-100
-        begin_percent_index = int((self.size_in_bytes* begin_percent) / 100)
-        end_percent_index = int((self.size_in_bytes* end_percent) / 100)
+        begin_percent_index = int((self.size_in_bytes * begin_percent) / 100)
+        end_percent_index = int((self.size_in_bytes * end_percent) / 100)
 
         return self.raw_binary_file[begin_percent_index:end_percent_index]
-    
-    def plot_2D_digraph(self, raw_binary_file_slice: bytes = None):
-        if not raw_binary_file_slice:
-            raw_binary_file_slice = self.hexa_pair_unique_array
-            color_info = self.hexa_pair_unique_array_counts
-        else:
-            raw_binary_file_slice, color_info = self.get_unique_array_and_counts(raw_binary_file_slice)
-
-        normalize = colors.LogNorm(vmin=color_info.min(), vmax=color_info.max())
-        plt.axes().set_facecolor("black")
-        plt.scatter(x=raw_binary_file_slice[:, 0], 
-                    y=raw_binary_file_slice[:, 1],
-                    c=color_info,
-                    s=2,
-                    cmap="magma",
-                    norm=normalize)
-        plt.show()
 
     def get_slices_by_amount(self, number_of_slices, unique_array, unique_array_counts):
         list_of_arrays = []
@@ -214,7 +181,7 @@ class File:
                                    unique_array_counts[i*slice_length : (i+1)*slice_length]))
         return list_of_arrays
 
-
+    '''
     def plot_3D_digraph(self, unique_array_of_file_slice: bytes = None):
         NUMBER_OF_SLICES = 10
         if not unique_array_of_file_slice:
@@ -257,22 +224,28 @@ class File:
                     cmap="magma",
                     norm=normalize)
         plt.show()
+    '''
     
     def get_2D_array_sizes_with_aspect_ratio(self, length: int, aspect_ratio: int) -> tuple[int, int]:
-        side_width = int(math.sqrt(length / aspect_ratio))
-        side_height = int(length / side_width)
-        side_width += 1
-        side_height += 1
+        """
+        Return the width, and height based on the length and aspect ratio
+        """
+
+        side_width = int(math.sqrt(length / aspect_ratio)) + 1
+        side_height = int(length / side_width) + 1
         
         return side_width, side_height
 
     
-    def get_byteplot_PIL_image(self, max_width=400, ratio=4, downsample=False) -> np.ndarray:
+    def get_byteplot_PIL_image(self, slice=None, max_width=400, ratio=4, downsample=False) -> np.ndarray:
         """
         max_width: maximum number of pixels allowed in the output (NOTE: it's after downsampling)
         ratio: y / x (height / width)
         downsample: if downsampling should happen
         """
+
+        if not slice:
+            slice = self.raw_binary_file
 
         # Read in the file
         width, height = self.get_2D_array_sizes_with_aspect_ratio(self.size_in_bytes, ratio)
@@ -283,7 +256,7 @@ class File:
 
         # Pad the remaining space with zeroes by appending an empty array so the
         # 1D array can be reshaped to 2D
-        array2D = np.append(self.raw_binary_file, np.zeros(((width*height)-self.size_in_bytes), np.uint8))
+        array2D = np.append(slice, np.zeros(((width*height)-self.size_in_bytes), np.uint8))
         array2D = array2D.reshape((height, width))
 
         # Downsample the array by keeping its ratio ???
