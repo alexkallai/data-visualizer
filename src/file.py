@@ -4,7 +4,7 @@ from hilbertcurve.hilbertcurve import HilbertCurve
 from util import timer
 from itertools import groupby
 from matplotlib import colormaps
-from matplotlib import colors
+from matplotlib import colors, cm
 from matplotlib import pyplot as plt
 from pathlib import Path
 import hashlib
@@ -134,6 +134,10 @@ class File:
         of the 1D byte series
         The hilbert curve's size _x8_ in 3D every iteration!
         """
+        
+        # Set up colormap
+        normalizer = colors.Normalize(vmin=0.0, vmax=1.0, clip=True)
+        colormapper = cm.ScalarMappable(norm=normalizer, cmap=colormaps['viridis'])
 
         if not slice:
             slice = self.raw_binary_file
@@ -143,11 +147,11 @@ class File:
         print(f"Number of 3D hilbert curve iterations: {number_of_iterations}")
         hilbert_curve = HilbertCurve(p=number_of_iterations, n=NUMBER_OF_DIMENSIONS, n_procs=-1)
 
-        slice = np.frombuffer(slice, dtype=np.uint8)
+        slice_original = np.frombuffer(slice, dtype=np.uint8)
+        slice = colormapper.to_rgba(np.frombuffer(slice, dtype=np.uint8), alpha=False, bytes=False, norm=True)[:,:3]
+        slice = np.array(slice, dtype=np.float32)
         # Create a suitably sized array
         array_side_len = int(math.pow(2, number_of_iterations))
-        hilbert_array = np.zeros( ( array_side_len, array_side_len, array_side_len), 
-                                    dtype=np.uint8 )
         list_of_coords = np.zeros( (self.size_in_bytes, 3), dtype=np.uint8 )
         list_of_colors = np.zeros( (self.size_in_bytes, 3), dtype=np.float32)
 
@@ -157,15 +161,17 @@ class File:
             return viridis(color_component)[:3]
 
         # Zip method
-        for index, point in enumerate(zip(slice,
+        for index, point in enumerate(zip(slice_original,
                                           hilbert_curve.points_from_distances(distances=range(self.size_in_bytes)))):
-            hilbert_array[ point[1][1] ][ point[1][0] ][ point[1][2] ] = point[0]
-            list_of_coords[index][0] = point[1][0]
-            list_of_coords[index][1] = point[1][1]
-            list_of_coords[index][2] = point[1][2]
+            #list_of_coords[index][0] = point[1][0]
+            #list_of_coords[index][1] = point[1][1]
+            #list_of_coords[index][2] = point[1][2]
+            list_of_coords[index] = point[1]
             # TODO very slow:
             list_of_colors[index] = map_byte_to_color(point[0])
 
+        print("Equals?")
+        print(np.array_equal( slice, list_of_colors, equal_nan=False))
         return list_of_coords, list_of_colors
 
     @timer
