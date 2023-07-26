@@ -9,8 +9,8 @@ class CanvasWrapper3D:
     def __init__(self):
         self.canvas = SceneCanvas()
         self.view = self.canvas.central_widget.add_view()
-        scatter = visuals.Markers()
-        scatter.set_data(
+        self.scatter = visuals.Markers()
+        self.scatter.set_data(
             pos = np.empty((100, 3),  dtype= np.uint8),
             size = 5,
             #edge_width: float = 1,
@@ -26,13 +26,13 @@ class CanvasWrapper3D:
     def set_data(self, data: np.ndarray, colors: np.ndarray):
         #del self.view
         #self.view = self.canvas.central_widget.add_view()
-        scatter = visuals.Markers(alpha=0.3)
-        scatter.set_data(
+        #scatter = visuals.Markers(alpha=0.3)
+        self.scatter.set_data(
             pos = data,
             size = 3,
             edge_width = 0,
             edge_color = 'white',
             face_color = colors,
             symbol = 'o')
-        self.view.add(scatter)
+        self.view.add(self.scatter)
         self.view.update()

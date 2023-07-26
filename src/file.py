@@ -73,7 +73,7 @@ class File:
 
         # itertool pairwise solution
         for res in groupby(pairwise(slice)):
-            digraph_image[ res[0][0] ][ res[0][1] ] = len(list( res[1] )) 
+            digraph_image[ res[0][0] ][ res[0][1] ] = len(list( res[1] ))
 
         return digraph_image
 
@@ -108,7 +108,6 @@ class File:
         # Create a suitably sized array
         hilbert_array_side_length = int(math.pow(2, number_of_iterations))
         hilbert_array = np.zeros( ( hilbert_array_side_length, hilbert_array_side_length), dtype=np.uint8 )
-        
         # Zip method
         for point in zip(slice,
                          hilbert_curve.points_from_distances(distances=range(self.size_in_bytes))):
@@ -146,32 +145,9 @@ class File:
         number_of_iterations = self.get_3D_hilbert_iterations_number()
         print(f"Number of 3D hilbert curve iterations: {number_of_iterations}")
         hilbert_curve = HilbertCurve(p=number_of_iterations, n=NUMBER_OF_DIMENSIONS, n_procs=-1)
-
-        slice_original = np.frombuffer(slice, dtype=np.uint8)
-        slice = colormapper.to_rgba(np.frombuffer(slice, dtype=np.uint8), alpha=False, bytes=False, norm=True)[:,:3]
-        slice = np.array(slice, dtype=np.float32)
-        # Create a suitably sized array
-        array_side_len = int(math.pow(2, number_of_iterations))
-        list_of_coords = np.zeros( (self.size_in_bytes, 3), dtype=np.uint8 )
-        list_of_colors = np.zeros( (self.size_in_bytes, 3), dtype=np.float32)
-
-        def map_byte_to_color(byte):
-            color_component = (byte/256)
-            viridis = colormaps['viridis']
-            return viridis(color_component)[:3]
-
-        # Zip method
-        for index, point in enumerate(zip(slice_original,
-                                          hilbert_curve.points_from_distances(distances=range(self.size_in_bytes)))):
-            #list_of_coords[index][0] = point[1][0]
-            #list_of_coords[index][1] = point[1][1]
-            #list_of_coords[index][2] = point[1][2]
-            list_of_coords[index] = point[1]
-            # TODO very slow:
-            list_of_colors[index] = map_byte_to_color(point[0])
-
-        print("Equals?")
-        print(np.array_equal( slice, list_of_colors, equal_nan=False))
+        slice = colormapper.to_rgba(np.frombuffer(slice, dtype=np.uint8), alpha=False, bytes=False, norm=False)[:,:3]
+        list_of_colors = np.float32(slice)
+        list_of_coords = np.array(hilbert_curve.points_from_distances(distances=range(self.size_in_bytes)), dtype=np.uint8)
         return list_of_coords, list_of_colors
 
     @timer
@@ -308,3 +284,4 @@ if __name__ == "__main__":
     image = testfile.get_byteplot_PIL_image()
     testfile.get_2D_hilbert_image()
     testfile.get_2D_digraph_image()
+    testfile.get_3D_hilbert_image()
