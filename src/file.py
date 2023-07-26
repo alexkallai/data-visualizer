@@ -1,6 +1,7 @@
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QFileDialog
 from hilbertcurve.hilbertcurve import HilbertCurve
+from util import timer
 from itertools import groupby
 from matplotlib import colormaps
 from matplotlib import colors
@@ -58,6 +59,7 @@ class File:
             directory=os.getcwd()
         )
 
+    @timer
     def get_2D_digraph_image(self, slice=None) -> np.ndarray:
         """
         This function returns the 256 x 256 (1 byte) pixels sized image where the
@@ -74,7 +76,8 @@ class File:
             digraph_image[ res[0][0] ][ res[0][1] ] = len(list( res[1] )) 
 
         return digraph_image
-    
+
+    @timer
     def get_2D_hilbert_iterations_number(self):
         """
         Iteration 1 - 4 members:  4^x -> x = 1
@@ -85,6 +88,7 @@ class File:
 
         return math.ceil( math.log10(self.size_in_bytes) / math.log10(4) )
 
+    @timer
     def get_2D_hilbert_image(self, slice=None) -> np.ndarray:
         """
         This function returns the ? x ? sized image that is the 2D representation
@@ -112,6 +116,7 @@ class File:
 
         return hilbert_array
 
+    @timer
     def get_3D_hilbert_iterations_number(self) -> int:
         """
         Iteration 1 - 8 members:   8^x -> x = 1
@@ -122,6 +127,7 @@ class File:
 
         return math.ceil( math.log10(self.size_in_bytes) / math.log10(8) )
 
+    @timer
     def get_3D_hilbert_image(self, slice=None) -> np.ndarray:
         """
         This function returns the ? x ? x ? sized image that is the 3D representation
@@ -162,9 +168,11 @@ class File:
 
         return list_of_coords, list_of_colors
 
+    @timer
     def get_unique_array_and_counts(self, array):
         return np.unique(array, return_counts=True, axis=0)
 
+    @timer
     def get_bin_file_slice(self, begin_percent=0, end_percent=100) -> bytes:
         # 0-100
         begin_percent_index = int((self.size_in_bytes * begin_percent) / 100)
@@ -172,6 +180,7 @@ class File:
 
         return self.raw_binary_file[begin_percent_index:end_percent_index]
 
+    @timer
     def get_slices_by_amount(self, number_of_slices, unique_array, unique_array_counts):
         list_of_arrays = []
         array_length = len(unique_array)
@@ -225,7 +234,8 @@ class File:
                     norm=normalize)
         plt.show()
     '''
-    
+
+    @timer
     def get_2D_array_sizes_with_aspect_ratio(self, length: int, aspect_ratio: int) -> tuple[int, int]:
         """
         Return the width, and height based on the length and aspect ratio
@@ -233,10 +243,11 @@ class File:
 
         side_width = int(math.sqrt(length / aspect_ratio)) + 1
         side_height = int(length / side_width) + 1
-        
+
         return side_width, side_height
 
-    
+
+    @timer
     def get_byteplot_PIL_image(self, slice=None, max_width=400, ratio=4, downsample=False) -> np.ndarray:
         """
         max_width: maximum number of pixels allowed in the output (NOTE: it's after downsampling)
@@ -266,18 +277,22 @@ class File:
             return array2D[::sampling_no, ::sampling_no]
 
         return array2D
-    
+
+    @timer
     def apply_colormap_to_image(array: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
+    @timer
     def get_qpixmap_from_PIL_image(self, image: np.ndarray) -> QPixmap:
         height, width = image.shape
         qt_image = QImage(image, width, height, width, QImage.Format_Grayscale8)
         return QPixmap(qt_image)
-    
+
+    @timer
     def sha256_hash(self) -> str:
         return hashlib.sha256(self.raw_binary_file).hexdigest()
 
+    @timer
     def md5_hash(self) -> str:
         return hashlib.md5(self.raw_binary_file).hexdigest()
 
