@@ -66,7 +66,7 @@ class File:
         values are the number of occurrences of the plotted (byte, byte+1) pair
         """
         
-        if not slice:
+        if not hasattr(slice, "__len__"):
             slice = self.raw_binary_file
 
         digraph_image = np.zeros(shape=(256, 256), dtype=np.uint16)
@@ -78,7 +78,7 @@ class File:
         return digraph_image
 
     @timer
-    def get_2D_hilbert_iterations_number(self):
+    def get_2D_hilbert_iterations_number(self, size_in_bytes = None):
         """
         Iteration 1 - 4 members:  4^x -> x = 1
         Iteration 2 - 16 members: 4^x -> x = 2
@@ -86,7 +86,10 @@ class File:
         x = log(length) / log(4)
         """
 
-        return math.ceil( math.log10(self.size_in_bytes) / math.log10(4) )
+        if not size_in_bytes:
+            size_in_bytes = self.size_in_bytes
+
+        return math.ceil( math.log10(size_in_bytes) / math.log10(4) )
 
     @timer
     def get_2D_hilbert_image(self, slice=None) -> np.ndarray:
@@ -96,7 +99,7 @@ class File:
         The hilbert curve's size _quadruples_ in 2D every iteration!
         """
 
-        if not slice:
+        if not hasattr(slice, "__len__"):
             slice = self.raw_binary_file
 
         NUMBER_OF_DIMENSIONS = 2
@@ -121,7 +124,7 @@ class File:
         Iteration 1 - 8 members:   8^x -> x = 1
         Iteration 2 - 64 members:  8^x -> x = 2
         Iteration 3 - 512 members: 8^x -> x = 3
-        x = log(length) / log(4)
+        x = log(length) / log(8)
         """
 
         return math.ceil( math.log10(self.size_in_bytes) / math.log10(8) )
@@ -138,8 +141,10 @@ class File:
         normalizer = colors.Normalize(vmin=0.0, vmax=1.0, clip=True)
         colormapper = cm.ScalarMappable(norm=normalizer, cmap=colormaps['viridis'])
 
-        if not slice:
+        if not hasattr(slice, "__len__"):
             slice = self.raw_binary_file
+        size_in_bytes = len(slice)
+
 
         NUMBER_OF_DIMENSIONS = 3
         number_of_iterations = self.get_3D_hilbert_iterations_number()
@@ -147,7 +152,7 @@ class File:
         hilbert_curve = HilbertCurve(p=number_of_iterations, n=NUMBER_OF_DIMENSIONS, n_procs=-1)
         slice = colormapper.to_rgba(np.frombuffer(slice, dtype=np.uint8), alpha=False, bytes=False, norm=False)[:,:3]
         list_of_colors = np.float32(slice)
-        list_of_coords = np.array(hilbert_curve.points_from_distances(distances=range(self.size_in_bytes)), dtype=np.uint8)
+        list_of_coords = np.array(hilbert_curve.points_from_distances(distances=range(size_in_bytes)), dtype=np.uint8)
         return list_of_coords, list_of_colors
 
     @timer
@@ -237,20 +242,22 @@ class File:
         downsample: if downsampling should happen
         """
 
-        if not slice:
+        if not hasattr(slice, "__len__"):
             slice = self.raw_binary_file
+        size_in_bytes = len(slice)
 
         # Read in the file
-        width, height = self.get_2D_array_sizes_with_aspect_ratio(self.size_in_bytes, ratio)
+        width, height = self.get_2D_array_sizes_with_aspect_ratio(size_in_bytes, ratio)
 
         print(f"Init width: { width}")
         print(f"Init height: { height}")
-        print(f"Len: {self.size_in_bytes}")
+        print(f"Len: {size_in_bytes}")
 
         # Pad the remaining space with zeroes by appending an empty array so the
         # 1D array can be reshaped to 2D
-        array2D = np.append(slice, np.zeros(((width*height)-self.size_in_bytes), np.uint8))
-        array2D = array2D.reshape((height, width))
+        # !!! the image starts from the left bottom corner, so 2 flips are required
+        array2D = np.append(np.flip(slice), np.zeros(((width*height)-size_in_bytes), np.uint8))
+        array2D = np.flip(array2D.reshape((height, width)), axis=1)
 
         # Downsample the array by keeping its ratio ???
         sampling_no = width / max_width

@@ -2,6 +2,7 @@
 from PyQt5.QtWidgets import QDesktopWidget, QTabWidget, QMainWindow, QWidget, QHBoxLayout, QFormLayout, QLabel
 from PyQt5 import QtGui
 from superqt import QRangeSlider, QLabeledRangeSlider
+from superqt.sliders._labeled import EdgeLabelMode
 from qtpy.QtCore import Qt
 from vispy.app import use_app
 import configparser
@@ -21,6 +22,7 @@ from plotwidget import PlotCanvasWrapper
 filepath = Path(__file__).parent
 config = configparser.ConfigParser()
 config.read(f"{filepath}/settings.ini", encoding="utf-8")
+SLIDER_RANGE = 1000
 
 
 class MainWindow(QMainWindow):
@@ -64,24 +66,26 @@ class MainWindow(QMainWindow):
         self.image_preview_widget_canvas_1 = PreviewCanvas()
         self.image_preview_widget_canvas_2 = PreviewCanvas()
         # Range slider 1
-        self.range_slider_1 = QLabeledRangeSlider(Qt.Orientation.Vertical)
+        self.range_slider_1 = QRangeSlider(Qt.Orientation.Vertical)
         self.range_slider_1.setBarMovesAllHandles(True)
-        self.range_slider_1.setRange(0, 1000)
-        self.range_slider_1.setValue((0, 1000))
+        self.range_slider_1.setRange(0, SLIDER_RANGE)
+        self.range_slider_1.setValue((0, SLIDER_RANGE))
+        self.range_slider_1.setInvertedAppearance(True)
         # Range slider 2
-        self.range_slider_2 = QLabeledRangeSlider(Qt.Orientation.Vertical)
+        self.range_slider_2 = QRangeSlider(Qt.Orientation.Vertical)
         self.range_slider_2.setBarMovesAllHandles(True)
-        self.range_slider_2.setRange(0, 1000)
-        self.range_slider_2.setValue((0, 1000))
+        self.range_slider_2.setRange(0, SLIDER_RANGE)
+        self.range_slider_2.setValue((0, SLIDER_RANGE))
+        self.range_slider_2.setInvertedAppearance(True)
 
         self.controls = ControlWidgets()
 
         # Initialize tabs
         self.tabs = QTabWidget()
         # Add canvas.native as a widget, which is a low level widget
-        self.tabs.addTab(self.canvas_wrapper_2D.canvas.native, "2D view")
-        self.tabs.addTab(self.canvas_wrapper_3D.canvas.native, "3D view")
-        self.tabs.addTab(self.canvas_wrapper_hilbert.canvas.native, "Hilbert curve view")
+        self.tabs.addTab(self.canvas_wrapper_2D.canvas.native, "2D digraph")
+        self.tabs.addTab(self.canvas_wrapper_3D.canvas.native, "3D Hilbert curve")
+        self.tabs.addTab(self.canvas_wrapper_hilbert.canvas.native, "2D Hilbert curve")
         #self.tabs.addTab(self.canvas_wrapper_byte_histogram.canvas.native, "Byte histogram")
         self.tabs.addTab(self.canvas_wrapper_byte_histogram.plotcanvas.native, "Byte histogram")
         # Add widgets
@@ -114,6 +118,11 @@ class MainWindow(QMainWindow):
             self.statusbar_layout.set_sha256(self.file.sha256_hash())
             self.statusbar_layout.set_md5(self.file.md5_hash())
     
+    def get_file_position(self, slider_start_position: int, slider_end_position: int):
+        start = int(self.file.size_in_bytes * slider_start_position / SLIDER_RANGE)
+        end = int(self.file.size_in_bytes * slider_end_position / SLIDER_RANGE)
+        return start, end
+    
     def set_file_pipeline(self):
         if hasattr(self.file, "raw_binary_file"):
             self.set_statusbar()
@@ -126,15 +135,33 @@ class MainWindow(QMainWindow):
             self.canvas_wrapper_byte_histogram.set_plot(self.file.raw_binary_file)
             self.canvas_wrapper_3D.set_data(*self.file.get_3D_hilbert_image() )
 
+    def set_file_slice_pipeline(self, slider_start_position: int, slider_end_position: int):
+        if hasattr(self.file, "raw_binary_file"):
+
+            start, end = self.get_file_position(slider_start_position=slider_start_position, slider_end_position=slider_end_position)
+
+            # Set the images
+            self.image_preview_widget_canvas_1.set_image(self.file.get_byteplot_PIL_image(self.file.raw_binary_file[start:end]))
+            self.image_preview_widget_canvas_2.set_image(self.file.get_byteplot_PIL_image(self.file.raw_binary_file[start:end]))
+            self.canvas_wrapper_2D.set_image(self.file.get_2D_digraph_image(self.file.raw_binary_file[start:end]))
+            self.canvas_wrapper_hilbert.set_image(self.file.get_2D_hilbert_image(self.file.raw_binary_file[start:end]))
+            self.canvas_wrapper_byte_histogram.set_plot(self.file.raw_binary_file[start:end])
+            self.canvas_wrapper_3D.set_data(*self.file.get_3D_hilbert_image(self.file.raw_binary_file[start:end]) )
+
+
     def slider_1_release_handler(self):
         print("Slider 1 released")
         print(self.range_slider_1.value())
+        self.set_file_slice_pipeline(self.range_slider_1.value()[0], self.range_slider_1.value()[1])
 
     def slider_2_release_handler(self):
         print("Slider 2 released")
+        print(self.range_slider_2.value())
 
     def slider_1_move_handler(self):
-        print("Slider 1 moved")
+        self.controls.range_selector_1_status_start_step.setText(str(self.range_slider_1.value()[0]))
+        self.controls.range_selector_1_status_end_step.setText(str(self.range_slider_1.value()[1]))
 
     def slider_2_move_handler(self):
-        print("Slider 2 moved")
+        self.controls.range_selector_2_status_start_step.setText(str(self.range_slider_2.value()[0]))
+        self.controls.range_selector_2_status_end_step.setText(str(self.range_slider_2.value()[1]))
