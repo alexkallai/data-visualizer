@@ -2,11 +2,15 @@ import dearpygui.dearpygui as dpg
 from itertools import chain
 import DearPyGui_DragAndDrop as dpg_dnd
 import os
+import ctypes
+
+# Include the following code before showing the viewport/calling `dearpygui.dearpygui.show_viewport`.
+#ctypes.windll.shcore.SetProcessDpiAwareness(2)
 
 root_path = os.path.dirname(__file__)
 
 STATUS_BAR_HEIGHT = 20
-FONT_SCALE = 2
+FONT_SCALE = 4
 DEBUG_MODE = True
 
 
