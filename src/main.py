@@ -45,15 +45,18 @@ def create_sidebar_layout():
 
     def callback(sender, app_data):
         print('OK was clicked.')
-        print("Sender: ", sender)
-        print("App Data: ", app_data)
+        #print("Sender: ", sender)
+        #print("App Data: ", app_data)
+        file_key = list(app_data["selections"].keys())[0]
+        file_path = app_data["selections"][file_key]
+        print(file_path)
 
     def cancel_callback(sender, app_data):
         print('Cancel was clicked.')
-        print("Sender: ", sender)
-        print("App Data: ", app_data)
+        #print("Sender: ", sender)
+        #print("App Data: ", app_data)
 
-    with dpg.file_dialog(directory_selector=False, show=False, callback=callback, cancel_callback=cancel_callback, id="file_dialog_id", width=700 ,height=400):
+    with dpg.file_dialog(directory_selector=False, show=False, callback=callback, cancel_callback=cancel_callback, id="file_dialog_id", width=700 ,height=400, file_count=1, modal=True):
         dpg.add_file_extension(".*")
     dpg.add_button(label="File Selector", callback=lambda: dpg.show_item("file_dialog_id"))
 
