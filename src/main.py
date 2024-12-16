@@ -1,7 +1,12 @@
 import dearpygui.dearpygui as dpg
 from itertools import chain
+import os
+
+root_path = os.path.dirname(__file__)
 
 STATUS_BAR_HEIGHT = 20
+FONT_SCALE = 2
+
 
 def create_status_bar_theme():
     with dpg.theme() as status_bar_theme:
@@ -26,6 +31,14 @@ def adjustable_separator(child_window, width=3840, height=5, colour=(255, 255, 2
     with dpg.item_handler_registry() as item_handler:
         dpg.add_item_clicked_handler(callback=clicked_callback)
     dpg.bind_item_handler_registry(item=separator, handler_registry=item_handler)
+
+def set_up_fonts():
+    # TODO not workin yet
+    # Set up fonts
+    with dpg.font_registry():
+        font_regular = dpg.add_font(os.path.join(root_path, "src", 'CascadiaCode.ttf'), 16*FONT_SCALE)
+    dpg.set_global_font_scale(1/FONT_SCALE)
+    dpg.bind_font(font_regular)
 
 def create_sidebar_layout():
     pass
@@ -72,8 +85,8 @@ def build_window():
                 dpg.add_button(label="world")
 
 if __name__ == "__main__":
-    dpg.create_context()
 
+    dpg.create_context()
     build_window()
 
     dpg.create_viewport(width=800, height=600)
