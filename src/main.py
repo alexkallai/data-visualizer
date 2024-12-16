@@ -42,7 +42,21 @@ def set_up_fonts():
     dpg.bind_font(font_regular)
 
 def create_sidebar_layout():
-    pass
+
+    def callback(sender, app_data):
+        print('OK was clicked.')
+        print("Sender: ", sender)
+        print("App Data: ", app_data)
+
+    def cancel_callback(sender, app_data):
+        print('Cancel was clicked.')
+        print("Sender: ", sender)
+        print("App Data: ", app_data)
+
+    dpg.add_file_dialog(
+        directory_selector=True, show=False, callback=callback, tag="file_dialog_id",
+        cancel_callback=cancel_callback, width=700 ,height=400)
+    dpg.add_button(label="Directory Selector", callback=lambda: dpg.show_item("file_dialog_id"))
 
 def create_tabs_layout():
     with dpg.tab_bar(tag="test_tab_bar") as tb:
@@ -57,10 +71,9 @@ def create_tabs_layout():
 
 def file_drop_callback(sender, app_data, user_data):
     pass
- 
+
 def build_window():
     status_bar_theme = create_status_bar_theme()
-
     def resize_primary_window():
         x,y = dpg.get_item_rect_size(primary_window)
         dpg.configure_item(status_bar, width=x)
@@ -84,8 +97,8 @@ def build_window():
             dpg.add_table_column(width_fixed=True, init_width_or_weight=200)
             dpg.add_table_column()
             with dpg.table_row():
-                with dpg.child_window(drop_callback=file_drop_callback) as child_window_1:
-                    dpg.add_text("Child Window 1")
+                with dpg.child_window() as child_window_1:
+                    create_sidebar_layout()
                 with dpg.group():
                     with dpg.child_window() as child_window_2:
                         # TAB layout
