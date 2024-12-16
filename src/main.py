@@ -135,6 +135,7 @@ if __name__ == "__main__":
     dpg.setup_dearpygui()
     dpg.show_viewport()
     if DEBUG_MODE:
+        # TODO: not working
         while dpg.is_dearpygui_running():
             jobs = dpg.get_callback_queue() # retrieves and clears queue
             dpg.run_callbacks(jobs)
