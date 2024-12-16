@@ -64,6 +64,10 @@ def create_sidebar_layout():
     with dpg.file_dialog(directory_selector=False, show=False, callback=callback, cancel_callback=cancel_callback, id="file_dialog_id", width=700 ,height=400, file_count=1, modal=True):
         dpg.add_file_extension(".*")
     dpg.add_button(label="File Selector", callback=lambda: dpg.show_item("file_dialog_id"))
+    dpg.add_slider_double(vertical=True,
+                          min_value=0,
+                          max_value=100,
+                          )
 
 def create_tabs_layout():
     with dpg.tab_bar(tag="test_tab_bar") as tb:
