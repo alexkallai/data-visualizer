@@ -1,5 +1,6 @@
 import dearpygui.dearpygui as dpg
 from itertools import chain
+import DearPyGui_DragAndDrop as dpg_dnd
 import os
 
 root_path = os.path.dirname(__file__)
@@ -65,11 +66,11 @@ def create_tabs_layout():
         #creating a tab with the tag test_tab_1
         with dpg.tab(label="tab 1", tag="test_tab_1"):
             #creating a button that executes the callback change_tab with the tag 100
-            dpg.add_button(label="activate tab 2", callback=print("a"), tag=100)
+            dpg.add_button(label="activate tab 2", callback=print("TODO"), tag=100)
         #creating a tab with the tag test_tab_2
         with dpg.tab(label="tab 2", tag="test_tab_2"):
             #creating a button that executes the callback change_tab with the tag 200
-            dpg.add_button(label="activate tab 1", tag=200, callback=print("a"),)
+            dpg.add_button(label="activate tab 1", tag=200, callback=print("TODO"),)
 
 def file_drop_callback(sender, app_data, user_data):
     pass
@@ -113,12 +114,22 @@ def build_window():
                 dpg.add_text("Hello")
                 dpg.add_button(label="world")
 
+def initialize_drag_and_drop():
+    # Init drop feature
+    dpg_dnd.initialize()
+    def drop(data, keys):
+        print(f'{data}')
+        #print(f'{keys}')
+    dpg_dnd.set_drop(drop)
+
 if __name__ == "__main__":
 
     dpg.create_context()
+    initialize_drag_and_drop()
     dpg.configure_app(manual_callback_management=DEBUG_MODE)
     set_up_fonts()
     build_window()
+
 
     dpg.create_viewport(width=800, height=600)
     dpg.setup_dearpygui()
