@@ -53,10 +53,9 @@ def create_sidebar_layout():
         print("Sender: ", sender)
         print("App Data: ", app_data)
 
-    dpg.add_file_dialog(
-        directory_selector=True, show=False, callback=callback, tag="file_dialog_id",
-        cancel_callback=cancel_callback, width=700 ,height=400)
-    dpg.add_button(label="Directory Selector", callback=lambda: dpg.show_item("file_dialog_id"))
+    with dpg.file_dialog(directory_selector=False, show=False, callback=callback, cancel_callback=cancel_callback, id="file_dialog_id", width=700 ,height=400):
+        dpg.add_file_extension(".*")
+    dpg.add_button(label="File Selector", callback=lambda: dpg.show_item("file_dialog_id"))
 
 def create_tabs_layout():
     with dpg.tab_bar(tag="test_tab_bar") as tb:
@@ -97,8 +96,9 @@ def build_window():
             dpg.add_table_column(width_fixed=True, init_width_or_weight=200)
             dpg.add_table_column()
             with dpg.table_row():
-                with dpg.child_window() as child_window_1:
-                    create_sidebar_layout()
+                with dpg.group():
+                    with dpg.child_window() as child_window_1:
+                        create_sidebar_layout()
                 with dpg.group():
                     with dpg.child_window() as child_window_2:
                         # TAB layout
