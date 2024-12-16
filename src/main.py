@@ -6,6 +6,7 @@ root_path = os.path.dirname(__file__)
 
 STATUS_BAR_HEIGHT = 20
 FONT_SCALE = 2
+DEBUG_MODE = True
 
 
 def create_status_bar_theme():
@@ -44,6 +45,17 @@ def create_sidebar_layout():
     pass
 
 def create_tabs_layout():
+    with dpg.tab_bar(tag="test_tab_bar") as tb:
+        #creating a tab with the tag test_tab_1
+        with dpg.tab(label="tab 1", tag="test_tab_1"):
+            #creating a button that executes the callback change_tab with the tag 100
+            dpg.add_button(label="activate tab 2", callback=print("a"), tag=100)
+        #creating a tab with the tag test_tab_2
+        with dpg.tab(label="tab 2", tag="test_tab_2"):
+            #creating a button that executes the callback change_tab with the tag 200
+            dpg.add_button(label="activate tab 1", tag=200, callback=print("a"),)
+
+def file_drop_callback(sender, app_data, user_data):
     pass
  
 def build_window():
@@ -72,11 +84,12 @@ def build_window():
             dpg.add_table_column(width_fixed=True, init_width_or_weight=200)
             dpg.add_table_column()
             with dpg.table_row():
-                with dpg.child_window() as child_window_1:
+                with dpg.child_window(drop_callback=file_drop_callback) as child_window_1:
                     dpg.add_text("Child Window 1")
                 with dpg.group():
                     with dpg.child_window() as child_window_2:
-                        dpg.add_text("Child Window 2")
+                        # TAB layout
+                        create_tabs_layout()
 
         with dpg.window(no_title_bar=True, no_move=True, no_resize=False) as status_bar:
             dpg.bind_item_theme(status_bar, status_bar_theme)
@@ -87,11 +100,18 @@ def build_window():
 if __name__ == "__main__":
 
     dpg.create_context()
+    dpg.configure_app(manual_callback_management=DEBUG_MODE)
     set_up_fonts()
     build_window()
 
     dpg.create_viewport(width=800, height=600)
     dpg.setup_dearpygui()
     dpg.show_viewport()
-    dpg.start_dearpygui()
+    if DEBUG_MODE:
+        while dpg.is_dearpygui_running():
+            jobs = dpg.get_callback_queue() # retrieves and clears queue
+            dpg.run_callbacks(jobs)
+            dpg.render_dearpygui_frame()
+    else:
+        dpg.start_dearpygui()
     dpg.destroy_context()
