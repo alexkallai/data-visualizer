@@ -26,6 +26,12 @@ def adjustable_separator(child_window, width=3840, height=5, colour=(255, 255, 2
     with dpg.item_handler_registry() as item_handler:
         dpg.add_item_clicked_handler(callback=clicked_callback)
     dpg.bind_item_handler_registry(item=separator, handler_registry=item_handler)
+
+def create_sidebar_layout():
+    pass
+
+def create_tabs_layout():
+    pass
  
 def build_window():
     status_bar_theme = create_status_bar_theme()
@@ -34,6 +40,8 @@ def build_window():
         x,y = dpg.get_item_rect_size(primary_window)
         dpg.configure_item(status_bar, width=x)
         dpg.configure_item(status_bar, pos=(0, y-STATUS_BAR_HEIGHT))
+        dpg.configure_item(child_window_1, height=y-STATUS_BAR_HEIGHT*3)
+        dpg.configure_item(child_window_2, height=y-STATUS_BAR_HEIGHT*3)
 
     # BUILD MAIN WINDOW
     with dpg.window() as primary_window:
