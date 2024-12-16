@@ -115,6 +115,8 @@ def build_window():
                 dpg.add_button(label="world")
 
 def initialize_drag_and_drop():
+    # TODO: add drag over enter etc. https://github.com/IvanNazaruk/DearPyGui-DragAndDrop/blob/main/Examples/example3.py
+    
     # Init drop feature
     dpg_dnd.initialize()
     def drop(data, keys):
