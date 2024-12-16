@@ -36,7 +36,7 @@ def set_up_fonts():
     # TODO not workin yet
     # Set up fonts
     with dpg.font_registry():
-        font_regular = dpg.add_font(os.path.join(root_path, "src", 'CascadiaCode.ttf'), 16*FONT_SCALE)
+        font_regular = dpg.add_font(os.path.join(root_path, 'CascadiaCode.ttf'), 16*FONT_SCALE)
     dpg.set_global_font_scale(1/FONT_SCALE)
     dpg.bind_font(font_regular)
 
@@ -87,6 +87,7 @@ def build_window():
 if __name__ == "__main__":
 
     dpg.create_context()
+    set_up_fonts()
     build_window()
 
     dpg.create_viewport(width=800, height=600)
