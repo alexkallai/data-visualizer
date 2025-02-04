@@ -2,7 +2,10 @@ import dearpygui.dearpygui as dpg
 from itertools import chain
 import DearPyGui_DragAndDrop as dpg_dnd
 import os
+from src.file import File
 import ctypes
+import numpy as np
+import matplotlib.cm as cm
 
 # Include the following code before showing the viewport/calling `dearpygui.dearpygui.show_viewport`.
 #ctypes.windll.shcore.SetProcessDpiAwareness(2)
@@ -12,7 +15,18 @@ root_path = os.path.dirname(__file__)
 STATUS_BAR_HEIGHT = 20
 FONT_SCALE = 4
 DEBUG_MODE = True
+BYTE_SIZE = 256
+UPSCALE_FACTOR = 4
 
+# TODO: remove this
+texture_data = []
+for i in range(0, BYTE_SIZE * BYTE_SIZE * UPSCALE_FACTOR * UPSCALE_FACTOR):
+    texture_data.append(255 / 255)
+    texture_data.append(0)
+    texture_data.append(255 / 255)
+    texture_data.append(255 / 255)
+
+texture_data = np.array(object=texture_data, dtype=np.float32)
 
 def create_status_bar_theme():
     with dpg.theme() as status_bar_theme:
@@ -55,6 +69,23 @@ def create_sidebar_layout():
         file_key = list(app_data["selections"].keys())[0]
         file_path = app_data["selections"][file_key]
         print(file_path)
+        if file_path:
+            file = File(file_path)
+            image = file.get_2D_digraph_image()
+            # TODO: move this to the file class
+            # Normalize the image to range [0, 1]
+            digraph_norm =image.astype(np.float32) / np.max(image) if np.max(image) > 0 else image.astype(np.float32)
+
+            # Select a colormap (e.g., 'viridis', 'plasma', 'magma', 'inferno', 'cividis')
+            colormap = cm.get_cmap('magma')
+
+            # Apply colormap (returns RGBA values in [0,1] range)
+            rgba_image = colormap(digraph_norm)
+
+            # Convert to float32
+            rgba_image = rgba_image.astype(np.float32)
+            rgba_image = np.repeat(np.repeat(rgba_image, UPSCALE_FACTOR, axis=0), UPSCALE_FACTOR, axis=1)
+            update_texture("raw_texture_digraph", rgba_image)
 
     def cancel_callback(sender, app_data):
         print('Cancel was clicked.')
@@ -69,16 +100,26 @@ def create_sidebar_layout():
                           max_value=100,
                           )
 
+def update_texture(tag: str, new_texture_data):
+    dpg.set_value(tag, new_texture_data)
+
 def create_tabs_layout():
+
+    # First, create texture registry
+    with dpg.texture_registry(show=False): # TODO modify to False
+        dpg.add_raw_texture(width=BYTE_SIZE * UPSCALE_FACTOR, height=BYTE_SIZE * UPSCALE_FACTOR, default_value=texture_data, format=dpg.mvFormat_Float_rgba, tag="raw_texture_digraph")
+    # Create the tab bar and tabs
     with dpg.tab_bar(tag="test_tab_bar") as tb:
         #creating a tab with the tag test_tab_1
         with dpg.tab(label="tab 1", tag="test_tab_1"):
+            dpg.add_image("raw_texture_digraph")
             #creating a button that executes the callback change_tab with the tag 100
             dpg.add_button(label="activate tab 2", callback=print("TODO"), tag=100)
         #creating a tab with the tag test_tab_2
         with dpg.tab(label="tab 2", tag="test_tab_2"):
             #creating a button that executes the callback change_tab with the tag 200
             dpg.add_button(label="activate tab 1", tag=200, callback=print("TODO"),)
+    update_texture("raw_texture_digraph", texture_data)
 
 def file_drop_callback(sender, app_data, user_data):
     pass
@@ -105,7 +146,7 @@ def build_window():
 
 
         with dpg.table(header_row=False, resizable=True):
-            dpg.add_table_column(width_fixed=True, init_width_or_weight=200)
+            dpg.add_table_column(width_fixed=True, init_width_or_weight=600)
             dpg.add_table_column()
             with dpg.table_row():
                 with dpg.group():
