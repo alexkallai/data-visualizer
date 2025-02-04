@@ -1,5 +1,3 @@
-from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QFileDialog
 from hilbertcurve.hilbertcurve import HilbertCurve
 from util import timer
 from itertools import groupby
@@ -29,10 +27,10 @@ class File:
     """
 
     def __init__(self, path=None) -> None:
-        self.path = None
+        #self.path = None
 
         if path == None:
-            path, filter = self.get_file_name()
+            raise Exception
         if path:
             try:
                 with open(path, "rb") as f:
@@ -50,14 +48,6 @@ class File:
         self.file_name = str(os.path.split(self.path)[-1])
         #self.hexa_pair_array = self.generate_hexa_pair_array()
         #self.hexa_pair_unique_array, self.hexa_pair_unique_array_counts = self.get_unique_array_and_counts(self.hexa_pair_array)
-
-    # Select the file and return the path
-    def get_file_name(self) -> tuple[str, str]:
-        return QFileDialog.getOpenFileName(
-            parent=None,
-            caption="Open a file",
-            directory=os.getcwd()
-        )
 
     @timer
     def get_2D_digraph_image(self, slice=None) -> np.ndarray:
@@ -271,11 +261,11 @@ class File:
     def apply_colormap_to_image(array: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
-    @timer
-    def get_qpixmap_from_PIL_image(self, image: np.ndarray) -> QPixmap:
-        height, width = image.shape
-        qt_image = QImage(image, width, height, width, QImage.Format_Grayscale8)
-        return QPixmap(qt_image)
+    #@timer
+    #def get_qpixmap_from_PIL_image(self, image: np.ndarray) -> QPixmap:
+        #height, width = image.shape
+        #qt_image = QImage(image, width, height, width, QImage.Format_Grayscale8)
+        #return QPixmap(qt_image)
 
     @timer
     def sha256_hash(self) -> str:
